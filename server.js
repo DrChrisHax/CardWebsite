@@ -1,12 +1,15 @@
 require('dotenv').config();
 const express = require('express');
-const connectDB = require('./src/config/db');
+const path = require('path');
+const connectDB = require('./src/db/db');
 
 const app = express();
 
 connectDB();
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/', require('./src/routes/routes'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
