@@ -1,4 +1,6 @@
 node_modules/
 .env
 
+# Exclude any docs I am using for documentation
 docs/
+*.md
