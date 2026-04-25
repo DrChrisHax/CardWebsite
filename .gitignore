@@ -3,4 +3,3 @@ node_modules/
 
 # Exclude any docs I am using for documentation
 docs/
-*.md
