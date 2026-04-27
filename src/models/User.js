@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   createdOn:    { type: Date, default: Date.now },
   updatedOn:    { type: Date, default: Date.now },
   deletedOn:    { type: Date, default: null },
+  balance:      { type: Number, default: 1000 },
 });
 
 userSchema.statics.usernameExists = async function (username) {
