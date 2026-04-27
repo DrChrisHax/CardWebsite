@@ -65,4 +65,29 @@ async function register(req, res) {
   }
 }
 
-module.exports = { checkUsername, checkEmail, register };
+async function login(req, res) {
+  const { identifier, password } = req.body;
+
+  if (!identifier || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const user = await User.findByIdentifier(identifier);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid login credentials' });
+    }
+
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid login credentials' });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    return res.json({ token });
+  } catch {
+    return res.status(500).json({ error: 'Server error' });
+  }
+}
+
+module.exports = { checkUsername, checkEmail, register, login };

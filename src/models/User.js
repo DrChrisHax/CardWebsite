@@ -17,4 +17,10 @@ userSchema.statics.emailExists = async function (email) {
   return !!(await this.exists({ email: email.toLowerCase() }));
 };
 
+userSchema.statics.findByIdentifier = async function (identifier) {
+  return this.findOne({
+    $or: [{ username: identifier }, { email: identifier.toLowerCase() }],
+  });
+};
+
 module.exports = mongoose.model('User', userSchema);

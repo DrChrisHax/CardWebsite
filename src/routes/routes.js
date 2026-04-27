@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 
-const { checkUsername, checkEmail, register } = require('../controllers/authController');
+const { checkUsername, checkEmail, register, login } = require('../controllers/authController');
 
 const page = (filePath) => path.join(__dirname, '../../public/pages', filePath);
 
@@ -27,5 +27,6 @@ router.get('/home', (req, res) => res.sendFile(page('home.html')));
 router.get('/api/auth/check/username', checkUsername);
 router.get('/api/auth/check/email', checkEmail);
 router.post('/api/auth/register', register);
+router.post('/api/auth/login', login);
 
 module.exports = router;
