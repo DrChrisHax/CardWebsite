@@ -11,7 +11,7 @@ const page = (filePath) => path.join(__dirname, '../../public/pages', filePath);
 // Pages
 // ============================================================
 
-router.get('/', (req, res) => res.redirect('/login'));
+router.get('/', (req, res) => res.redirect('/home'));
 
 router.get('/login', (req, res) => res.sendFile(page('auth/login.html')));
 router.get('/register', (req, res) => res.sendFile(page('auth/register.html')));
@@ -32,5 +32,10 @@ router.post('/api/auth/register', register);
 router.post('/api/auth/login', login);
 router.post('/api/auth/logout', requireAuth, logout);
 router.get('/api/auth/me', requireAuth, getMe);
+
+router.use((req, res) => {
+  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
+  res.redirect('/home');
+});
 
 module.exports = router;

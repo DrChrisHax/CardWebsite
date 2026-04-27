@@ -3,6 +3,20 @@ const passwordInput = document.getElementById('password');
 const formError = document.getElementById('form-error');
 const submitBtn = document.getElementById('submit-btn');
 
+// Redirect already-logged-in users away from the login page
+(function () {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  fetch('/api/auth/me', {
+    headers: { Authorization: 'Bearer ' + token },
+  }).then(function (res) {
+    if (res.ok) {
+      const params = new URLSearchParams(window.location.search);
+      window.location.replace(params.get('redirect') || '/home');
+    }
+  });
+})();
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   formError.textContent = '';
@@ -26,7 +40,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       return;
     }
     localStorage.setItem('token', data.token);
-    window.location.href = '/home';
+    const params = new URLSearchParams(window.location.search);
+    window.location.replace(params.get('redirect') || '/home');
   } catch {
     formError.textContent = 'Network error. Please try again.';
     submitBtn.disabled = false;
