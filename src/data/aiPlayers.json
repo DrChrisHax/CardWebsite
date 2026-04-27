@@ -1,0 +1,14 @@
+[
+  {
+    "playerName": "Alpha",
+    "model": "BaseEngine",
+    "gameName": "Texas Hold'em",
+    "active": true
+  },
+  {
+    "playerName": "Beta",
+    "model": "BaseEngine",
+    "gameName": "Texas Hold'em",
+    "active": true
+  }
+]
