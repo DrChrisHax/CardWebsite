@@ -1,9 +1,26 @@
+async function loadUserData() {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+function formatBalance(n) {
+  return '$' + n.toLocaleString('en-US');
+}
+
 async function logout() {
   const token = localStorage.getItem('token');
   try {
     await fetch('/api/auth/logout', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: 'Bearer ' + token },
     });
   } finally {
     localStorage.removeItem('token');
@@ -11,7 +28,7 @@ async function logout() {
   }
 }
 
-function createNavbar() {
+async function createNavbar() {
   const nav = document.createElement('nav');
   nav.className = 'navbar';
   nav.innerHTML = `
@@ -25,7 +42,7 @@ function createNavbar() {
       </button>
     </div>
     <div class="navbar-right">
-      <span class="navbar-balance">$1,000</span>
+      <span class="navbar-balance">...</span>
       <div class="navbar-profile-wrapper">
         <button class="navbar-profile-btn" aria-label="Profile" aria-expanded="false">
           <div class="navbar-avatar"></div>
@@ -45,28 +62,36 @@ function createNavbar() {
   const homeBtn = nav.querySelector('.navbar-home-btn');
   const profileBtn = nav.querySelector('.navbar-profile-btn');
   const dropdown = nav.querySelector('.navbar-dropdown');
+  const balanceEl = nav.querySelector('.navbar-balance');
 
-  homeBtn.addEventListener('click', () => {
+  homeBtn.addEventListener('click', function () {
     window.location.href = '/home';
   });
 
-  profileBtn.addEventListener('click', (e) => {
+  profileBtn.addEventListener('click', function (e) {
     e.stopPropagation();
     const isOpen = !dropdown.hidden;
     dropdown.hidden = isOpen;
     profileBtn.setAttribute('aria-expanded', String(!isOpen));
   });
 
-  document.addEventListener('click', () => {
+  document.addEventListener('click', function () {
     dropdown.hidden = true;
     profileBtn.setAttribute('aria-expanded', 'false');
   });
 
-  nav.querySelector('#dd-profile').addEventListener('click', () => {
+  nav.querySelector('#dd-profile').addEventListener('click', function () {
     window.location.href = '/profile';
   });
 
   nav.querySelector('#dd-logout').addEventListener('click', logout);
+
+  const user = await loadUserData();
+  if (user) balanceEl.textContent = formatBalance(user.balance);
+
+  window.addEventListener('balancechange', function (e) {
+    balanceEl.textContent = formatBalance(e.detail.balance);
+  });
 }
 
 createNavbar();

@@ -1,0 +1,26 @@
+[
+  {
+    "gameName": "Texas Hold'em",
+    "path": "/games/texas_holdem",
+    "price": 0,
+    "active": true
+  },
+  {
+    "gameName": "Test 1",
+    "path": "/",
+    "price": 10,
+    "active": true
+  },
+  {
+    "gameName": "Test 2",
+    "path": "/",
+    "price": 10000,
+    "active": true
+  },
+  {
+    "gameName": "Test 3",
+    "path": "/",
+    "price": 1000000,
+    "active": true
+  }
+]

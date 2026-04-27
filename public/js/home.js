@@ -1,22 +1,18 @@
-// TODO: replace with real API calls once backend is ready
-const MOCK_PURCHASED_GAMES = [
-  { id: 1, gameName: "Texas Hold'em" },
-];
+const token = localStorage.getItem('token');
 
 function createGameTile(game) {
   const tile = document.createElement('div');
   tile.className = 'game-tile';
   tile.innerHTML = `
     <div class="tile-art">
-      <span class="tile-placeholder">♠</span>
+      <span class="tile-placeholder">&#9824;</span>
     </div>
     <div class="tile-info">
       <span class="tile-name">${game.gameName}</span>
     </div>
   `;
-  tile.addEventListener('click', () => {
-    // TODO: route to game page via routes.js
-    console.log('Navigate to game:', game.gameName);
+  tile.addEventListener('click', function () {
+    window.location.href = game.path;
   });
   return tile;
 }
@@ -24,6 +20,7 @@ function createGameTile(game) {
 function createPlusTile() {
   const tile = document.createElement('div');
   tile.className = 'game-tile tile-plus';
+  tile.setAttribute('aria-label', 'Open store to buy games');
   tile.innerHTML = `
     <div class="tile-art">
       <span class="tile-plus-icon">+</span>
@@ -32,18 +29,39 @@ function createPlusTile() {
       <span class="tile-name">Buy a Game</span>
     </div>
   `;
-  tile.addEventListener('click', () => {
-    // TODO: open purchase dialog
-    console.log('Open purchase dialog');
+  tile.addEventListener('click', function () {
+    window.openStore();
   });
   return tile;
 }
 
-function renderGrid(games) {
-  const grid = document.getElementById('games-grid');
-  grid.innerHTML = '';
-  games.forEach(game => grid.appendChild(createGameTile(game)));
-  grid.appendChild(createPlusTile());
+async function loadGames() {
+  try {
+    const res = await fetch('/api/user/mygames', {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
 }
 
-renderGrid(MOCK_PURCHASED_GAMES);
+async function init() {
+  const grid = document.getElementById('games-grid');
+  grid.innerHTML = '';
+  const games = await loadGames();
+  const plusTile = createPlusTile();
+  games.forEach(function (game) {
+    grid.appendChild(createGameTile(game));
+  });
+  grid.appendChild(plusTile);
+}
+
+window.addEventListener('gamepurchased', function (e) {
+  const grid = document.getElementById('games-grid');
+  const plusTile = grid.querySelector('.tile-plus');
+  grid.insertBefore(createGameTile(e.detail.game), plusTile);
+});
+
+init();

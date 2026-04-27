@@ -100,9 +100,9 @@ async function logout(req, res) {
 
 async function getMe(req, res) {
   try {
-    const user = await User.findById(req.userId).select('username');
+    const user = await User.findById(req.userId).select('username balance');
     if (!user) return res.status(404).json({ error: 'User not found' });
-    return res.json({ username: user.username });
+    return res.json({ username: user.username, balance: user.balance });
   } catch {
     return res.status(500).json({ error: 'Server error' });
   }

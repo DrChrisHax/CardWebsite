@@ -1,5 +1,6 @@
 node_modules/
 .env
+scripts/
 
 # Exclude any docs I am using for documentation
 docs/
