@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const UserSetting = require("../models/UserSetting");
 const sessionManager = require("../utils/sessionManager");
 
 const SALT_ROUNDS = 12;
@@ -58,6 +59,8 @@ async function register(req, res) {
       email: email.trim().toLowerCase(),
       passwordHash,
     });
+
+    await UserSetting.populateDefaults(user._id);
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",

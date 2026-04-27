@@ -15,6 +15,10 @@ const {
   buyGame,
   getMyGames,
 } = require("../controllers/storeController");
+const {
+  getSettings,
+  updateSetting,
+} = require("../controllers/settingsController");
 const { requireAuth } = require("../middleware/auth");
 
 const page = (filePath) => path.join(__dirname, "../../public/pages", filePath);
@@ -58,6 +62,13 @@ router.get("/api/auth/me", requireAuth, getMe);
 router.get("/api/store", requireAuth, getStore);
 router.post("/api/store/buy/:gameId", requireAuth, buyGame);
 router.get("/api/user/mygames", requireAuth, getMyGames);
+
+// ============================================================
+// Settings
+// ============================================================
+
+router.get("/api/user/settings", requireAuth, getSettings);
+router.patch("/api/user/settings/:name", requireAuth, updateSetting);
 
 router.use((req, res) => {
   if (req.path.startsWith("/api/"))
