@@ -2,7 +2,13 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 
+const { checkUsername, checkEmail, register } = require('../controllers/authController');
+
 const page = (filePath) => path.join(__dirname, '../../public/pages', filePath);
+
+// ============================================================
+// Pages
+// ============================================================
 
 router.get('/', (req, res) => res.redirect('/login'));
 
@@ -13,5 +19,13 @@ router.get('/forgot-password-sent', (req, res) => res.sendFile(page('auth/forgot
 router.get('/reset-password', (req, res) => res.sendFile(page('auth/reset-password.html')));
 
 router.get('/home', (req, res) => res.sendFile(page('home.html')));
+
+// ============================================================
+// Auth
+// ============================================================
+
+router.get('/api/auth/check/username', checkUsername);
+router.get('/api/auth/check/email', checkEmail);
+router.post('/api/auth/register', register);
 
 module.exports = router;

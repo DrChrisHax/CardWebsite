@@ -9,4 +9,12 @@ const userSchema = new mongoose.Schema({
   deletedOn:    { type: Date, default: null },
 });
 
+userSchema.statics.usernameExists = async function (username) {
+  return !!(await this.exists({ username }));
+};
+
+userSchema.statics.emailExists = async function (email) {
+  return !!(await this.exists({ email: email.toLowerCase() }));
+};
+
 module.exports = mongoose.model('User', userSchema);
