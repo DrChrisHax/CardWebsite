@@ -1,35 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chris's Card Game Site</title>
-  <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/auth.css">
-</head>
-<body>
-  <main class="auth-page">
-    <div class="auth-card">
-      <h1>Welcome Back</h1>
-      <p class="auth-subtitle">Sign in to your account</p>
-      <form id="login-form" action="#" method="post" novalidate>
-        <div class="form-group">
-          <label for="identifier">Email or Username</label>
-          <input type="text" id="identifier" name="identifier" placeholder="Enter your email or username" autocomplete="username" required>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chris's Card Game Site</title>
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/auth.css" />
+  </head>
+  <body>
+    <main class="auth-page">
+      <div class="auth-card">
+        <h1>Welcome Back</h1>
+        <p class="auth-subtitle">Sign in to your account</p>
+        <form id="login-form" action="#" method="post" novalidate>
+          <div class="form-group">
+            <label for="identifier">Email or Username</label>
+            <input
+              type="text"
+              id="identifier"
+              name="identifier"
+              placeholder="Enter your email or username"
+              autocomplete="username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <p id="form-error" class="form-error" role="alert"></p>
+          <button type="submit" id="submit-btn" class="btn-primary">
+            Login
+          </button>
+        </form>
+        <div class="auth-links">
+          <span><a href="/register">Create an account</a></span>
+          <span><a href="/forgot-password">Forgot password?</a></span>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
-        </div>
-        <p id="form-error" class="form-error" role="alert"></p>
-        <button type="submit" id="submit-btn" class="btn-primary">Login</button>
-      </form>
-      <div class="auth-links">
-        <span><a href="/register">Create an account</a></span>
-        <span><a href="/forgot-password">Forgot password?</a></span>
       </div>
-    </div>
-  </main>
-  <script src="/js/login.js"></script>
-</body>
+    </main>
+    <script src="/js/login.js"></script>
+  </body>
 </html>

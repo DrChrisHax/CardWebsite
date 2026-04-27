@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  username:     { type: String, required: true, unique: true },
-  email:        { type: String, required: true, unique: true },
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
-  createdOn:    { type: Date, default: Date.now },
-  updatedOn:    { type: Date, default: Date.now },
-  deletedOn:    { type: Date, default: null },
-  balance:      { type: Number, default: 1000 },
+  createdOn: { type: Date, default: Date.now },
+  updatedOn: { type: Date, default: Date.now },
+  deletedOn: { type: Date, default: null },
+  balance: { type: Number, default: 1000 },
 });
 
 userSchema.statics.usernameExists = async function (username) {
@@ -24,4 +24,4 @@ userSchema.statics.findByIdentifier = async function (identifier) {
   });
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

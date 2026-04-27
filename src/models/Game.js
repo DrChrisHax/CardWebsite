@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const gameSchema = new mongoose.Schema({
   gameName: { type: String, required: true },
@@ -10,4 +10,4 @@ const gameSchema = new mongoose.Schema({
   deletedOn: { type: Date, default: null },
 });
 
-module.exports = mongoose.model('Game', gameSchema);
+module.exports = mongoose.model("Game", gameSchema);

@@ -30,11 +30,15 @@ function isValid(userId, token) {
 }
 
 // Prune inactive sessions every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [userId, session] of sessions) {
-    if (now - session.lastActive > SESSION_TIMEOUT_MS) sessions.delete(userId);
-  }
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [userId, session] of sessions) {
+      if (now - session.lastActive > SESSION_TIMEOUT_MS)
+        sessions.delete(userId);
+    }
+  },
+  5 * 60 * 1000,
+);
 
 module.exports = { create, remove, get, touch, isValid };

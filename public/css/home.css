@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background-image: url('/img/PokerBackground_Solid.jpg');
+  background-image: url("/img/PokerBackground_Solid.jpg");
   background-size: cover;
   background-position: center;
 }
@@ -24,7 +24,10 @@
   overflow: hidden;
   cursor: pointer;
   backdrop-filter: blur(8px);
-  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  transition:
+    border-color var(--transition),
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
 .game-tile:hover {

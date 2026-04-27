@@ -1,8 +1,8 @@
 async function loadUserData() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   try {
-    const res = await fetch('/api/auth/me', {
-      headers: { Authorization: 'Bearer ' + token },
+    const res = await fetch("/api/auth/me", {
+      headers: { Authorization: "Bearer " + token },
     });
     if (!res.ok) return null;
     return await res.json();
@@ -12,25 +12,25 @@ async function loadUserData() {
 }
 
 function formatBalance(n) {
-  return '$' + n.toLocaleString('en-US');
+  return "$" + n.toLocaleString("en-US");
 }
 
 async function logout() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   try {
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token },
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token },
     });
   } finally {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   }
 }
 
 async function createNavbar() {
-  const nav = document.createElement('nav');
-  nav.className = 'navbar';
+  const nav = document.createElement("nav");
+  nav.className = "navbar";
   nav.innerHTML = `
     <div class="navbar-left">
       <button class="navbar-home-btn" aria-label="Home">
@@ -59,37 +59,37 @@ async function createNavbar() {
 
   document.body.prepend(nav);
 
-  const homeBtn = nav.querySelector('.navbar-home-btn');
-  const profileBtn = nav.querySelector('.navbar-profile-btn');
-  const dropdown = nav.querySelector('.navbar-dropdown');
-  const balanceEl = nav.querySelector('.navbar-balance');
+  const homeBtn = nav.querySelector(".navbar-home-btn");
+  const profileBtn = nav.querySelector(".navbar-profile-btn");
+  const dropdown = nav.querySelector(".navbar-dropdown");
+  const balanceEl = nav.querySelector(".navbar-balance");
 
-  homeBtn.addEventListener('click', function () {
-    window.location.href = '/home';
+  homeBtn.addEventListener("click", function () {
+    window.location.href = "/home";
   });
 
-  profileBtn.addEventListener('click', function (e) {
+  profileBtn.addEventListener("click", function (e) {
     e.stopPropagation();
     const isOpen = !dropdown.hidden;
     dropdown.hidden = isOpen;
-    profileBtn.setAttribute('aria-expanded', String(!isOpen));
+    profileBtn.setAttribute("aria-expanded", String(!isOpen));
   });
 
-  document.addEventListener('click', function () {
+  document.addEventListener("click", function () {
     dropdown.hidden = true;
-    profileBtn.setAttribute('aria-expanded', 'false');
+    profileBtn.setAttribute("aria-expanded", "false");
   });
 
-  nav.querySelector('#dd-profile').addEventListener('click', function () {
-    window.location.href = '/profile';
+  nav.querySelector("#dd-profile").addEventListener("click", function () {
+    window.location.href = "/profile";
   });
 
-  nav.querySelector('#dd-logout').addEventListener('click', logout);
+  nav.querySelector("#dd-logout").addEventListener("click", logout);
 
   const user = await loadUserData();
   if (user) balanceEl.textContent = formatBalance(user.balance);
 
-  window.addEventListener('balancechange', function (e) {
+  window.addEventListener("balancechange", function (e) {
     balanceEl.textContent = formatBalance(e.detail.balance);
   });
 }

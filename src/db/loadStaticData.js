@@ -1,5 +1,5 @@
-const Game = require('../models/Game');
-const games = require('../data/games.json');
+const Game = require("../models/Game");
+const games = require("../data/games.json");
 
 async function populateGames() {
   const count = await Game.countDocuments();
