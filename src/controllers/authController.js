@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const sessionManager = require('../utils/sessionManager');
 
 const SALT_ROUNDS = 12;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,6 +56,7 @@ async function register(req, res) {
     });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    sessionManager.create(user._id, token);
     return res.status(201).json({ token });
   } catch (err) {
     if (err.code === 11000) {
@@ -84,10 +86,16 @@ async function login(req, res) {
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    sessionManager.create(user._id, token);
     return res.json({ token });
   } catch {
     return res.status(500).json({ error: 'Server error' });
   }
 }
 
-module.exports = { checkUsername, checkEmail, register, login };
+async function logout(req, res) {
+  sessionManager.remove(req.userId);
+  return res.json({ message: 'Logged out successfully' });
+}
+
+module.exports = { checkUsername, checkEmail, register, login, logout };

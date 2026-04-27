@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 
-const { checkUsername, checkEmail, register, login } = require('../controllers/authController');
+const { checkUsername, checkEmail, register, login, logout } = require('../controllers/authController');
+const { requireAuth } = require('../middleware/auth');
 
 const page = (filePath) => path.join(__dirname, '../../public/pages', filePath);
 
@@ -28,5 +29,6 @@ router.get('/api/auth/check/username', checkUsername);
 router.get('/api/auth/check/email', checkEmail);
 router.post('/api/auth/register', register);
 router.post('/api/auth/login', login);
+router.post('/api/auth/logout', requireAuth, logout);
 
 module.exports = router;
