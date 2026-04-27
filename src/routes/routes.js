@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 
-const { checkUsername, checkEmail, register, login, logout } = require('../controllers/authController');
+const { checkUsername, checkEmail, register, login, logout, getMe } = require('../controllers/authController');
 const { requireAuth } = require('../middleware/auth');
 
 const page = (filePath) => path.join(__dirname, '../../public/pages', filePath);
@@ -20,6 +20,7 @@ router.get('/forgot-password-sent', (req, res) => res.sendFile(page('auth/forgot
 router.get('/reset-password', (req, res) => res.sendFile(page('auth/reset-password.html')));
 
 router.get('/home', (req, res) => res.sendFile(page('home.html')));
+router.get('/profile', (req, res) => res.sendFile(page('profile.html')));
 
 // ============================================================
 // Auth
@@ -30,5 +31,6 @@ router.get('/api/auth/check/email', checkEmail);
 router.post('/api/auth/register', register);
 router.post('/api/auth/login', login);
 router.post('/api/auth/logout', requireAuth, logout);
+router.get('/api/auth/me', requireAuth, getMe);
 
 module.exports = router;

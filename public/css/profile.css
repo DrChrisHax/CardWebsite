@@ -1,0 +1,13 @@
+.profile-page {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-page h1 {
+  color: #000000;
+  font-size: 2rem;
+  font-weight: 600;
+}
