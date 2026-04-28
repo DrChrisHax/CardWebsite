@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chris's Card Game Site</title>
+    <script src="/js/auth-guard.js"></script>
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/navbar.css" />
+    <link rel="stylesheet" href="/css/texas_holdem.css" />
+  </head>
+  <body>
+    <!-- ============================================================ -->
+    <!-- Popup overlay (shown on load, hidden when game starts)       -->
+    <!-- ============================================================ -->
+    <div id="popup-overlay" class="th-overlay">
+      <!-- Welcome / state check popup -->
+      <div id="popup-welcome" class="th-popup">
+        <h2 class="th-popup-title">Texas Hold'em</h2>
+        <div id="welcome-actions"></div>
+      </div>
+
+      <!-- AI selection popup -->
+      <div id="popup-ai-select" class="th-popup" hidden>
+        <h2 class="th-popup-title">Choose Your Opponents</h2>
+        <div id="ai-seat-selects"></div>
+        <p id="ai-select-error" class="th-error" hidden></p>
+        <div class="th-popup-footer">
+          <button id="btn-back" class="th-btn th-btn-ghost">Back</button>
+          <button id="btn-start-game" class="th-btn th-btn-primary">
+            Start Game
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Table (always visible; seats hidden until game data loads)  -->
+    <!-- ============================================================ -->
+    <div id="table-wrap">
+      <!-- AI seats -->
+      <div class="seat ai-seat" id="seat-1" hidden>
+        <div class="seat-name"></div>
+        <div class="seat-chips"></div>
+        <div class="seat-model-tip"></div>
+      </div>
+      <div class="seat ai-seat" id="seat-2" hidden>
+        <div class="seat-name"></div>
+        <div class="seat-chips"></div>
+        <div class="seat-model-tip"></div>
+      </div>
+      <div class="seat ai-seat" id="seat-3" hidden>
+        <div class="seat-name"></div>
+        <div class="seat-chips"></div>
+        <div class="seat-model-tip"></div>
+      </div>
+      <div class="seat ai-seat" id="seat-4" hidden>
+        <div class="seat-name"></div>
+        <div class="seat-chips"></div>
+        <div class="seat-model-tip"></div>
+      </div>
+      <div class="seat ai-seat" id="seat-5" hidden>
+        <div class="seat-name"></div>
+        <div class="seat-chips"></div>
+        <div class="seat-model-tip"></div>
+      </div>
+
+      <!-- Player seat -->
+      <div class="seat player-seat" id="seat-0" hidden>
+        <div class="seat-name"></div>
+        <div class="seat-chips"></div>
+      </div>
+
+      <!-- Oval table surface with community card area -->
+      <div id="table-surface">
+        <div id="community-area">
+          <div id="community-cards">
+            <div class="card-slot"></div>
+            <div class="card-slot"></div>
+            <div class="card-slot"></div>
+            <div class="card-slot"></div>
+            <div class="card-slot"></div>
+          </div>
+          <div id="pot-display" hidden>Pot: $0</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/navbar.js" defer></script>
+    <script src="/js/games/texas_holdem.js"></script>
+  </body>
+</html>

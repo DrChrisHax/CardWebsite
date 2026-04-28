@@ -5,6 +5,7 @@ const aiSeatSchema = new mongoose.Schema(
     seat: { type: Number, required: true },
     aiPlayerId: { type: mongoose.Schema.Types.ObjectId, ref: "AIPlayer" },
     displayName: { type: String, required: true },
+    model: { type: String, required: true },
     chips: { type: Number, default: 1000 }, // 0 means the AI is out
   },
   { _id: false },

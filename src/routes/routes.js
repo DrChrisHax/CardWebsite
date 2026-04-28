@@ -19,6 +19,11 @@ const {
   getSettings,
   updateSetting,
 } = require("../controllers/settingsController");
+const {
+  getAIPlayers,
+  getState,
+  newGame,
+} = require("../controllers/games/texasHoldemController");
 const { requireAuth } = require("../middleware/auth");
 
 const page = (filePath) => path.join(__dirname, "../../public/pages", filePath);
@@ -43,6 +48,9 @@ router.get("/reset-password", (req, res) =>
 
 router.get("/home", (req, res) => res.sendFile(page("home.html")));
 router.get("/profile", (req, res) => res.sendFile(page("profile.html")));
+router.get("/games/texas_holdem", (req, res) =>
+  res.sendFile(page("games/texas_holdem.html")),
+);
 
 // ============================================================
 // Auth
@@ -69,6 +77,14 @@ router.get("/api/user/mygames", requireAuth, getMyGames);
 
 router.get("/api/user/settings", requireAuth, getSettings);
 router.patch("/api/user/settings/:name", requireAuth, updateSetting);
+
+// ============================================================
+// Texas Hold'em
+// ============================================================
+
+router.get("/api/ai-players", requireAuth, getAIPlayers);
+router.get("/api/poker/state", requireAuth, getState);
+router.post("/api/poker/new-game", requireAuth, newGame);
 
 router.use((req, res) => {
   if (req.path.startsWith("/api/"))
