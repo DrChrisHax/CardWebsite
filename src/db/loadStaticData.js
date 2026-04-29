@@ -11,9 +11,6 @@ async function populateGames() {
 }
 
 async function populateAIPlayers() {
-  const count = await AIPlayer.countDocuments();
-  if (count > 0) return;
-
   const docs = await Promise.all(
     aiPlayers.map(async ({ gameName, ...rest }) => {
       const game = await Game.findOne({ gameName });
@@ -22,8 +19,14 @@ async function populateAIPlayers() {
     }),
   );
 
-  await AIPlayer.insertMany(docs);
-  console.log(`Populated ${docs.length} AI Player(s)`);
+  for (const doc of docs) {
+    await AIPlayer.findOneAndUpdate(
+      { playerName: doc.playerName, gameId: doc.gameId },
+      { $set: doc },
+      { upsert: true },
+    );
+  }
+  console.log(`Upserted ${docs.length} AI Player(s)`);
 }
 
 async function loadStaticData() {

@@ -1,6 +1,8 @@
 const GameState = require("../../models/GameState");
 const AIPlayer = require("../../models/AIPlayer");
 const User = require("../../models/User");
+const GameManager = require("../../games/texas_holdem/GameManager");
+const botRegistry = require("../../games/texas_holdem/botRegistry");
 
 // ============================================================
 // AI Players
@@ -31,8 +33,17 @@ async function getState(req, res) {
       GameState.findOne({ userId: req.userId, gameId, status: "active" }),
       User.findById(req.userId).select("username balance"),
     ]);
+
+    if (!gameState)
+      return res.json({
+        gameState: null,
+        username: user.username,
+        playerChips: user.balance,
+      });
+
+    const gm = new GameManager(botRegistry);
     return res.json({
-      gameState,
+      gameState: gm.buildStateResponse(gameState, user),
       username: user.username,
       playerChips: user.balance,
     });
@@ -104,4 +115,81 @@ async function newGame(req, res) {
   }
 }
 
-module.exports = { getAIPlayers, getState, newGame };
+// ============================================================
+// Deal (start a new hand)
+// ============================================================
+
+async function deal(req, res) {
+  try {
+    const [gameState, user] = await Promise.all([
+      GameState.findOne({ userId: req.userId, status: "active" }),
+      User.findById(req.userId).select("username balance"),
+    ]);
+
+    if (!gameState) return res.status(404).json({ error: "No active game" });
+    if (gameState.currentHand) {
+      return res.status(400).json({ error: "Hand already in progress" });
+    }
+
+    const gm = new GameManager(botRegistry);
+    const result = await gm.startHand(gameState, user);
+    return res.json(result);
+  } catch (err) {
+    console.error("deal error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+// ============================================================
+// Player Action
+// ============================================================
+
+async function playerAction(req, res) {
+  try {
+    const [gameState, user] = await Promise.all([
+      GameState.findOne({ userId: req.userId, status: "active" }),
+      User.findById(req.userId).select("username balance"),
+    ]);
+
+    if (!gameState || !gameState.currentHand) {
+      return res.status(400).json({ error: "No hand in progress" });
+    }
+    if (gameState.currentHand.activeSeat !== 0) {
+      return res.status(400).json({ error: "Not your turn" });
+    }
+
+    const { action, amount = 0 } = req.body;
+    if (!action) return res.status(400).json({ error: "action required" });
+
+    const hand = gameState.currentHand;
+    const myBet = hand.seatBets["0"] || 0;
+    const toCall = Math.max(0, hand.currentBet - myBet);
+    const chips = user.balance;
+
+    // Validate
+    let valid = false;
+    if (action === "fold") valid = true;
+    else if (action === "check") valid = toCall === 0;
+    else if (action === "call") valid = toCall > 0 && toCall < chips;
+    else if (action === "raise") {
+      valid =
+        typeof amount === "number" &&
+        amount >= hand.lastRaiseAmount &&
+        toCall + amount <= chips;
+    } else if (action === "allin" || action === "all_in") valid = chips > 0;
+
+    if (!valid) return res.status(400).json({ error: "Invalid action" });
+
+    const gm = new GameManager(botRegistry);
+    gm.applyAction(hand, 0, { type: action, amount }, gameState, user);
+
+    const actionLog = [{ type: "action", seat: 0, action, amount }];
+    const result = await gm.runLoop(gameState, user, actionLog);
+    return res.json(result);
+  } catch (err) {
+    console.error("playerAction error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+module.exports = { getAIPlayers, getState, newGame, deal, playerAction };

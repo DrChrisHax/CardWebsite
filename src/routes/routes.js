@@ -23,6 +23,8 @@ const {
   getAIPlayers,
   getState,
   newGame,
+  deal,
+  playerAction,
 } = require("../controllers/games/texasHoldemController");
 const {
   deactivateAccount,
@@ -98,6 +100,8 @@ router.post("/api/user/reactivate", reactivateAccount);
 router.get("/api/ai-players", requireAuth, getAIPlayers);
 router.get("/api/poker/state", requireAuth, getState);
 router.post("/api/poker/new-game", requireAuth, newGame);
+router.post("/api/poker/deal", requireAuth, deal);
+router.post("/api/poker/action", requireAuth, playerAction);
 
 router.use((req, res) => {
   if (req.path.startsWith("/api/"))
