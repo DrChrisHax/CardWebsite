@@ -6,6 +6,7 @@ const HandHistory = require("../../models/HandHistory");
 const User = require("../../models/User");
 
 const NUM_SEATS = 6;
+const MIN_RAISE = 2;
 const MAX_HAND_BET = 150;
 
 const POSITIONS = [
@@ -43,6 +44,32 @@ class GameManager {
 
     // Build deck and deal hole cards
     const deck = new Deck();
+
+    // // =====================================================================
+    // // TESTING ONLY: force player Royal Flush. Remove before ship.
+    // // Moves royal flush cards to the front of the deck BEFORE dealing so
+    // // no bot can accidentally receive them. Player lands in seat 0 which
+    // // is dealt last in activeSeats order; community cards follow.
+    // // Deal order: each seat gets 2 cards sequentially, so seat 0 receives
+    // // cards at index (activeSeats.indexOf(0) * 2) and +1. We pre-arrange
+    // // the full deck so those slots are As/Ks and the next 5 are Qs Js Ts 2h 2d.
+    // const _TEST_ROYAL = ["As", "Ks", "Qs", "Js", "Ts", "2h", "2d"];
+    // const _otherCards = deck.cards.filter((c) => !_TEST_ROYAL.includes(c));
+    // const _p0idx = activeSeats.indexOf(0);
+    // const _before = _otherCards.splice(0, _p0idx * 2);
+    // deck.cards = [
+    //   ..._before, // other seats' hole cards before player
+    //   "As",
+    //   "Ks", // player hole cards
+    //   ..._otherCards, // remaining bot hole cards
+    //   "Qs",
+    //   "Js",
+    //   "Ts",
+    //   "2h",
+    //   "2d", // community cards (flop + turn + river)
+    // ];
+    // // =====================================================================
+
     const holeCards = {};
     const seatBets = {};
     const seatTotalBets = {};
@@ -256,6 +283,7 @@ class GameManager {
       gameStateId: gameState._id,
       status: gameState.status,
       dealerSeat: gameState.dealerSeat,
+      minHandBet: MIN_RAISE,
       maxHandBet: MAX_HAND_BET,
       handCount: gameState.handCount,
       playerChips: user.balance,
@@ -350,8 +378,7 @@ class GameManager {
         state.chipsToCall + action.amount <= state.stack
       );
     }
-    if (t === ActionType.ALL_IN)
-      return state.stack > 0;
+    if (t === ActionType.ALL_IN) return state.stack > 0;
     return false;
   }
 
@@ -624,4 +651,5 @@ class GameManager {
 }
 
 module.exports = GameManager;
+module.exports.MIN_RAISE = MIN_RAISE;
 module.exports.MAX_HAND_BET = MAX_HAND_BET;

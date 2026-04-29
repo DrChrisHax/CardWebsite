@@ -2,7 +2,7 @@ const GameState = require("../../models/GameState");
 const AIPlayer = require("../../models/AIPlayer");
 const User = require("../../models/User");
 const GameManager = require("../../games/texas_holdem/GameManager");
-const { MAX_HAND_BET } = require("../../games/texas_holdem/GameManager");
+const { MIN_RAISE, MAX_HAND_BET } = require("../../games/texas_holdem/GameManager");
 const botRegistry = require("../../games/texas_holdem/botRegistry");
 
 // ============================================================
@@ -179,7 +179,7 @@ async function playerAction(req, res) {
     else if (action === "raise") {
       valid =
         typeof amount === "number" &&
-        amount >= hand.lastRaiseAmount &&
+        amount >= MIN_RAISE &&
         amount <= MAX_HAND_BET &&
         toCall + amount <= chips;
     } else if (action === "all_in") valid = chips > 0;

@@ -210,7 +210,7 @@
           ? hand.seatBets[String(ai.seat)] || 0
           : 0;
       });
-      runningChips[0] = activeGameState.playerChips || 0;
+      runningChips[0] = playerData.chips || 0;
       runningSeatBets["0"] = hand
         ? hand.seatBets["0"] || hand.seatBets[0] || 0
         : 0;
@@ -504,23 +504,20 @@
       checkCallBtn.textContent =
         currentToCall > 0 ? "Call $" + currentToCall : "Check";
 
-      // Slider represents "raise to" level (new total bet). Server receives the
-      // increment (sliderValue - currentBet), computed in the confirm handler.
-      const minRaiseTo = hand.currentBet + hand.lastRaiseAmount;
-      // Max raise-to = currentBet + min(maxHandBet per raise, chips available after calling)
-      const maxHandBet = state.maxHandBet || 150;
-      const chipsAfterCall = Math.max(
-        0,
-        (state.playerChips || 0) - currentToCall,
+      // Slider represents raise-by amount (increment above the call).
+      // Server receives this increment directly.
+      const minRaiseBy = state.minHandBet || 2;
+      const maxRaiseBy = Math.min(
+        state.maxHandBet || 150,
+        Math.max(0, (state.playerChips || 0) - currentToCall),
       );
-      const maxRaiseTo = hand.currentBet + Math.min(maxHandBet, chipsAfterCall);
       const slider = document.getElementById("raise-slider");
-      slider.min = minRaiseTo;
-      slider.max = Math.max(minRaiseTo, maxRaiseTo);
-      slider.value = minRaiseTo;
-      document.getElementById("raise-amount").textContent = "to $" + minRaiseTo;
+      slider.min = minRaiseBy;
+      slider.max = Math.max(minRaiseBy, maxRaiseBy);
+      slider.value = minRaiseBy;
+      document.getElementById("raise-amount").textContent = "$" + minRaiseBy;
       document.getElementById("btn-raise-open").hidden =
-        minRaiseTo >= maxRaiseTo;
+        minRaiseBy >= maxRaiseBy;
 
       document.getElementById("action-base").hidden = false;
       document.getElementById("action-raise").hidden = true;
@@ -737,20 +734,17 @@
   document
     .getElementById("raise-slider")
     .addEventListener("input", function () {
-      document.getElementById("raise-amount").textContent = "to $" + this.value;
+      document.getElementById("raise-amount").textContent = "$" + this.value;
     });
 
   document
     .getElementById("btn-raise-confirm")
     .addEventListener("click", function () {
-      const raiseTo = parseInt(
+      const raiseBy = parseInt(
         document.getElementById("raise-slider").value,
         10,
       );
-      const hand = activeGameState && activeGameState.currentHand;
-      const currentBet = hand ? hand.currentBet : 0;
-      // Server expects the raise increment above currentBet, not the new total
-      sendAction({ action: "raise", amount: raiseTo - currentBet });
+      sendAction({ action: "raise", amount: raiseBy });
     });
 
   // ============================================================
