@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   createdOn: { type: Date, default: Date.now },
   updatedOn: { type: Date, default: Date.now },
-  deletedOn: { type: Date, default: null },
+  deactivatedOn: { type: Date, default: null },
   balance: { type: Number, default: 1000 },
 });
 

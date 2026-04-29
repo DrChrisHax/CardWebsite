@@ -1,13 +1,142 @@
 .profile-page {
   min-height: 100vh;
-  background: #ffffff;
+  padding: 80px 24px 80px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Header */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 48px 0 40px;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #4b5563;
+  flex-shrink: 0;
+}
+
+.profile-username {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Content area — lots of whitespace for future graphs */
+.profile-content {
+  min-height: 500px;
+}
+
+/* Danger zone */
+.profile-danger-zone {
+  display: flex;
+  gap: 16px;
+  padding: 40px 0 40px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-deactivate,
+.btn-delete {
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-weight: 500;
+  border: none;
+  transition: opacity var(--transition);
+}
+
+.btn-deactivate {
+  background: #f59e0b;
+  color: #000;
+}
+
+.btn-delete {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-deactivate:hover,
+.btn-delete:hover {
+  opacity: 0.85;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
-.profile-page h1 {
-  color: #000000;
-  font-size: 2rem;
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal {
+  background: #1e1e2e;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 420px;
+  width: 100%;
+}
+
+.modal h2 {
+  font-size: 1.25rem;
   font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.modal p {
+  color: var(--text-muted);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-cancel {
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: background var(--transition);
+}
+
+.modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.modal-confirm {
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  border: none;
+  font-weight: 500;
+  color: #fff;
+  transition: opacity var(--transition);
+}
+
+.modal-confirm--warn {
+  background: #f59e0b;
+  color: #000;
+}
+
+.modal-confirm--danger {
+  background: var(--red);
+}
+
+.modal-confirm:hover {
+  opacity: 0.85;
 }

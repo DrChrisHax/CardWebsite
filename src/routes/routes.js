@@ -24,6 +24,10 @@ const {
   getState,
   newGame,
 } = require("../controllers/games/texasHoldemController");
+const {
+  deactivateAccount,
+  deleteAccount,
+} = require("../controllers/profileController");
 const { requireAuth } = require("../middleware/auth");
 
 const page = (filePath) => path.join(__dirname, "../../public/pages", filePath);
@@ -77,6 +81,13 @@ router.get("/api/user/mygames", requireAuth, getMyGames);
 
 router.get("/api/user/settings", requireAuth, getSettings);
 router.patch("/api/user/settings/:name", requireAuth, updateSetting);
+
+// ============================================================
+// Profile
+// ============================================================
+
+router.patch("/api/user/deactivate", requireAuth, deactivateAccount);
+router.delete("/api/user/delete", requireAuth, deleteAccount);
 
 // ============================================================
 // Texas Hold'em

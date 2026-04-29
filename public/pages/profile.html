@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chris's Card Game Site</title>
+    <title>Profile</title>
     <link rel="stylesheet" href="/css/base.css" />
     <link rel="stylesheet" href="/css/navbar.css" />
     <link rel="stylesheet" href="/css/profile.css" />
@@ -11,8 +11,46 @@
   </head>
   <body>
     <main class="profile-page">
-      <h1 id="profile-username"></h1>
+      <section class="profile-header">
+        <div class="profile-avatar"></div>
+        <h1 class="profile-username" id="profile-username"></h1>
+      </section>
+
+      <section class="profile-content">
+        <!-- graphs and stats go here later -->
+      </section>
+
+      <section class="profile-danger-zone">
+        <button class="btn-deactivate" id="btn-deactivate">Deactivate Account</button>
+        <button class="btn-delete" id="btn-delete">Delete Account</button>
+      </section>
     </main>
+
+    <!-- Deactivate confirmation popup -->
+    <div class="modal-overlay" id="modal-deactivate" hidden>
+      <div class="modal">
+        <h2>Deactivate Account</h2>
+        <p>Your account will be deactivated. You can contact support to reactivate it.</p>
+        <!-- user accounts deactivated for 30 days will be deleted -->
+        <div class="modal-actions">
+          <button class="modal-cancel" id="deactivate-cancel">Cancel</button>
+          <button class="modal-confirm modal-confirm--warn" id="deactivate-confirm">Deactivate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete confirmation popup -->
+    <div class="modal-overlay" id="modal-delete" hidden>
+      <div class="modal">
+        <h2>Delete Account</h2>
+        <p>This will permanently delete your account and all associated data. This cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="modal-cancel" id="delete-cancel">Cancel</button>
+          <button class="modal-confirm modal-confirm--danger" id="delete-confirm">Delete</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/js/navbar.js" defer></script>
     <script src="/js/profile.js" defer></script>
   </body>
