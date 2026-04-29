@@ -42,26 +42,36 @@
       <div class="seat ai-seat" id="seat-1" hidden>
         <div class="seat-name"></div>
         <div class="seat-chips"></div>
+        <div class="seat-cards"></div>
+        <div class="seat-bet"></div>
         <div class="seat-model-tip"></div>
       </div>
       <div class="seat ai-seat" id="seat-2" hidden>
         <div class="seat-name"></div>
         <div class="seat-chips"></div>
+        <div class="seat-cards"></div>
+        <div class="seat-bet"></div>
         <div class="seat-model-tip"></div>
       </div>
       <div class="seat ai-seat" id="seat-3" hidden>
         <div class="seat-name"></div>
         <div class="seat-chips"></div>
+        <div class="seat-cards"></div>
+        <div class="seat-bet"></div>
         <div class="seat-model-tip"></div>
       </div>
       <div class="seat ai-seat" id="seat-4" hidden>
         <div class="seat-name"></div>
         <div class="seat-chips"></div>
+        <div class="seat-cards"></div>
+        <div class="seat-bet"></div>
         <div class="seat-model-tip"></div>
       </div>
       <div class="seat ai-seat" id="seat-5" hidden>
         <div class="seat-name"></div>
         <div class="seat-chips"></div>
+        <div class="seat-cards"></div>
+        <div class="seat-bet"></div>
         <div class="seat-model-tip"></div>
       </div>
 
@@ -69,10 +79,17 @@
       <div class="seat player-seat" id="seat-0" hidden>
         <div class="seat-name"></div>
         <div class="seat-chips"></div>
+        <!-- Card images injected by JS. Card set is hardcoded to Kenny Cards for now;
+             future: read from user settings and allow switching mid-session. -->
+        <div class="seat-cards player-cards"></div>
+        <div class="seat-bet"></div>
       </div>
 
       <!-- Oval table surface with community card area -->
       <div id="table-surface">
+        <!-- Dealer button: JS sets position via top/left based on active dealer seat -->
+        <div id="dealer-btn">D</div>
+
         <div id="community-area">
           <div id="community-cards">
             <div class="card-slot"></div>
@@ -83,6 +100,42 @@
           </div>
           <div id="pot-display" hidden>Pot: $0</div>
         </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- Action area (shown only on player's turn)                    -->
+      <!-- ============================================================ -->
+      <div id="action-area" hidden>
+        <!-- Base panel: three main choices -->
+        <div id="action-base">
+          <button id="btn-fold" class="th-btn th-btn-ghost">Fold</button>
+          <button id="btn-check-call" class="th-btn th-btn-secondary">
+            Check
+          </button>
+          <button id="btn-raise-open" class="th-btn th-btn-primary">
+            Raise
+          </button>
+        </div>
+
+        <!-- Raise panel: shown when Raise is clicked, hidden otherwise -->
+        <div id="action-raise" hidden>
+          <button id="btn-raise-back" class="th-btn th-btn-ghost">Back</button>
+          <input type="range" id="raise-slider" min="0" max="150" value="0" />
+          <span id="raise-amount">$0</span>
+          <button id="btn-raise-confirm" class="th-btn th-btn-primary">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Hand result overlay (shown after each hand concludes)        -->
+    <!-- ============================================================ -->
+    <div id="result-overlay" class="th-overlay" hidden>
+      <div id="result-box" class="th-popup">
+        <div id="result-text"></div>
+        <p class="result-hint">Click anywhere to continue</p>
       </div>
     </div>
 
