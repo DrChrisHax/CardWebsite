@@ -499,16 +499,6 @@
   animation: bet-flash 0.22s ease-out forwards;
 }
 
-@keyframes winner-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px #f1c40f, 0 0 10px rgba(241, 196, 15, 0.65); }
-  50%       { box-shadow: 0 0 0 3px #f1c40f, 0 0 22px rgba(241, 196, 15, 0.95); }
-}
-
-.card-winner {
-  box-shadow: 0 0 0 2px #f1c40f, 0 0 10px rgba(241, 196, 15, 0.65);
-  border-radius: 3px;
-  animation: winner-pulse 0.65s ease-in-out 1 forwards;
-}
 
 @keyframes overlay-fade {
   from { opacity: 0; }

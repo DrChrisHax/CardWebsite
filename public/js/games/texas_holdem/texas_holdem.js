@@ -500,7 +500,10 @@
       // Slider represents "raise to" level (new total bet). Server receives the
       // increment (sliderValue - currentBet), computed in the confirm handler.
       const minRaiseTo = hand.currentBet + hand.lastRaiseAmount;
-      const maxRaiseTo = hand.currentBet + Math.max(0, (state.playerChips || 0) - currentToCall);
+      // Max raise-to = currentBet + min(maxHandBet per raise, chips available after calling)
+      const maxHandBet = state.maxHandBet || 150;
+      const chipsAfterCall = Math.max(0, (state.playerChips || 0) - currentToCall);
+      const maxRaiseTo = hand.currentBet + Math.min(maxHandBet, chipsAfterCall);
       const slider = document.getElementById("raise-slider");
       slider.min = minRaiseTo;
       slider.max = Math.max(minRaiseTo, maxRaiseTo);
@@ -605,27 +608,23 @@
     const resultEl = document.getElementById("result-text");
 
     // Build winner text
-    if (handResult.winners && handResult.winners.length > 1) {
-      const total = handResult.winners.reduce(function (s, w) {
-        return s + w.amount;
-      }, 0);
-      resultEl.innerHTML = "<strong>Split pot</strong> — $" + total + " shared";
-    } else if (handResult.winners && handResult.winners.length === 1) {
-      const w = handResult.winners[0];
-      let name;
-      if (w.seat === 0) {
-        name = "You";
-      } else if (activeGameState && activeGameState.aiSeats) {
-        const ai = activeGameState.aiSeats.find(function (a) {
-          return a.seat === w.seat;
-        });
-        name = ai ? ai.displayName : "Seat " + w.seat;
-      } else {
-        name = "Seat " + w.seat;
+    function seatName(seat) {
+      if (seat === 0) return "You";
+      if (activeGameState && activeGameState.aiSeats) {
+        const ai = activeGameState.aiSeats.find(function (a) { return a.seat === seat; });
+        if (ai) return ai.displayName;
       }
-      const handDesc = w.handName ? " with <em>" + w.handName + "</em>" : "";
-      resultEl.innerHTML =
-        "<strong>" + name + "</strong> wins $" + w.amount + handDesc;
+      return "Seat " + seat;
+    }
+
+    if (handResult.winners && handResult.winners.length > 0) {
+      const lines = handResult.winners.map(function (w) {
+        const name = "<strong>" + seatName(w.seat) + "</strong>";
+        const verb = w.seat === 0 ? "win" : "wins";
+        const handDesc = w.handName ? " with <em>" + w.handName + "</em>" : "";
+        return name + " " + verb + " $" + w.amount + handDesc;
+      });
+      resultEl.innerHTML = lines.join("<br>");
     }
 
     // Reveal AI cards on showdown (revealedHands = { seatKey: { cards, handName } })
@@ -636,7 +635,6 @@
     if (isShowdown) {
       Object.keys(handResult.revealedHands).forEach(function (seatKey) {
         const entry = handResult.revealedHands[seatKey];
-        // entry is { cards, handName } for showdown seats
         const cards = entry && entry.cards ? entry.cards : entry;
         const el = document.getElementById("seat-" + seatKey);
         if (!el || !cards) return;
@@ -649,23 +647,6 @@
           cardsEl.appendChild(img);
         });
       });
-
-      // Highlight the winning seat's hole cards
-      if (handResult.winners && handResult.winners.length > 0) {
-        const winnerSeat = handResult.winners[0].seat;
-        const winnerEl = document.getElementById("seat-" + winnerSeat);
-        if (winnerEl) {
-          winnerEl.querySelectorAll(".card-img").forEach(function (img) {
-            img.classList.add("card-winner");
-          });
-        }
-      }
-    }
-
-    // Wait for the winner-pulse animation on any highlighted card before showing overlay
-    const winnerImg = document.querySelector(".card-winner");
-    if (winnerImg) {
-      await waitForAnimation(winnerImg, 1000);
     }
 
     // Show result overlay — CSS drives its fade-in; wait for that to complete
@@ -680,6 +661,18 @@
       if (handResult.playerEliminated || handResult.gameOver) {
         window.location.replace("/home");
         return;
+      }
+
+      // Update chip counts immediately so the player sees their new balance
+      // before the next deal animation starts.
+      if (activeGameState) {
+        document.querySelector("#seat-0 .seat-chips").textContent =
+          "$" + (activeGameState.playerChips || 0).toLocaleString("en-US");
+        (activeGameState.aiSeats || []).forEach(function (ai) {
+          const el = document.getElementById("seat-" + ai.seat);
+          if (el) el.querySelector(".seat-chips").textContent =
+            "$" + ai.chips.toLocaleString("en-US");
+        });
       }
 
       clearTableVisuals();

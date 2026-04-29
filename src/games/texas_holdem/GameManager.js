@@ -135,7 +135,10 @@ class GameManager {
       if (nextSeat === 0) {
         // Player's turn
         gameState.markModified("currentHand");
-        await gameState.save();
+        await Promise.all([
+          gameState.save(),
+          User.findByIdAndUpdate(gameState.userId, { balance: user.balance }),
+        ]);
         return {
           state: this.buildStateResponse(gameState, user),
           actionLog,
@@ -171,10 +174,6 @@ class GameManager {
     const chips = this._getChips(seat, gameState, user);
     const prevBet = hand.seatBets[seatKey] || 0;
     const toCall = Math.max(0, hand.currentBet - prevBet);
-    const maxAdditional = Math.max(
-      0,
-      MAX_HAND_BET - (hand.seatTotalBets[seatKey] || 0),
-    );
 
     switch (action.type) {
       case ActionType.FOLD:
@@ -190,7 +189,7 @@ class GameManager {
 
       case ActionType.CALL:
       case "call": {
-        const callAmount = Math.min(toCall, chips, maxAdditional);
+        const callAmount = Math.min(toCall, chips);
         const newChips = chips - callAmount;
         this._setChips(seat, newChips, gameState, user);
         hand.seatBets[seatKey] = prevBet + callAmount;
@@ -205,11 +204,12 @@ class GameManager {
 
       case ActionType.RAISE:
       case "raise": {
-        // action.amount = raise increment on top of currentBet
+        // action.amount = raise increment on top of currentBet, capped at MAX_HAND_BET per raise
         const oldBet = hand.currentBet;
-        const newBetLevel = oldBet + action.amount;
+        const raiseIncrement = Math.min(action.amount || 0, MAX_HAND_BET);
+        const newBetLevel = oldBet + raiseIncrement;
         const additional = newBetLevel - prevBet;
-        const cappedAdd = Math.min(additional, chips, maxAdditional);
+        const cappedAdd = Math.min(additional, chips);
         const newChips = chips - cappedAdd;
         this._setChips(seat, newChips, gameState, user);
         hand.seatBets[seatKey] = prevBet + cappedAdd;
@@ -227,7 +227,7 @@ class GameManager {
       case ActionType.ALL_IN:
       case "allin":
       case "all_in": {
-        const allInAmount = Math.min(chips, maxAdditional);
+        const allInAmount = chips;
         const newBet = prevBet + allInAmount;
         this._setChips(seat, 0, gameState, user);
         hand.seatBets[seatKey] = newBet;
@@ -258,6 +258,7 @@ class GameManager {
       gameStateId: gameState._id,
       status: gameState.status,
       dealerSeat: gameState.dealerSeat,
+      maxHandBet: MAX_HAND_BET,
       handCount: gameState.handCount,
       playerChips: user.balance,
       aiSeats: gameState.aiSeats.map((a) => ({
@@ -620,3 +621,4 @@ class GameManager {
 }
 
 module.exports = GameManager;
+module.exports.MAX_HAND_BET = MAX_HAND_BET;
