@@ -48,7 +48,9 @@
 
   function cardBackUrl() {
     // CardBackBlue only exists in Large and Medium sets, not Small
-    return "/res/cards/" + encodeURIComponent(CARD_SET_LARGE) + "/CardBackBlue.png";
+    return (
+      "/res/cards/" + encodeURIComponent(CARD_SET_LARGE) + "/CardBackBlue.png"
+    );
   }
 
   // Dealer button positions within #table-surface for each seat
@@ -67,7 +69,9 @@
 
   // Deliberate UX pause (e.g. between last bot action and card reveal).
   function pause(ms) {
-    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
   }
 
   // Wait for a CSS animation to end on an element.
@@ -76,7 +80,10 @@
     return new Promise(function (resolve) {
       var done = false;
       function finish() {
-        if (!done) { done = true; resolve(); }
+        if (!done) {
+          done = true;
+          resolve();
+        }
       }
       el.addEventListener("animationend", finish, { once: true });
       setTimeout(finish, capMs || 800);
@@ -88,7 +95,10 @@
     return new Promise(function (resolve) {
       var done = false;
       function finish() {
-        if (!done) { done = true; resolve(); }
+        if (!done) {
+          done = true;
+          resolve();
+        }
       }
       el.addEventListener("transitionend", finish, { once: true });
       setTimeout(finish, capMs || 800);
@@ -188,8 +198,8 @@
 
     // Seed running totals from the last known state so chip/pot updates are accurate
     const hand = activeGameState && activeGameState.currentHand;
-    let runningCurrentBet = hand ? (hand.currentBet || 0) : 0;
-    let runningPot = hand ? (hand.pot || 0) : 0;
+    let runningCurrentBet = hand ? hand.currentBet || 0 : 0;
+    let runningPot = hand ? hand.pot || 0 : 0;
 
     const runningChips = {};
     const runningSeatBets = {};
@@ -251,10 +261,7 @@
         const chips = runningChips[seat] || 0;
 
         if (entry.action === "fold") {
-          await Promise.all([
-            showBetBadge(seat, "Fold"),
-            animateFold(seat),
-          ]);
+          await Promise.all([showBetBadge(seat, "Fold"), animateFold(seat)]);
         } else if (entry.action === "check") {
           await showBetBadge(seat, "Check");
         } else if (entry.action === "call") {
@@ -434,9 +441,7 @@
     playerEl.querySelector(".seat-chips").textContent =
       "$" + (state.playerChips || 0).toLocaleString("en-US");
 
-    const playerBet = hand
-      ? hand.seatBets["0"] || hand.seatBets[0] || 0
-      : 0;
+    const playerBet = hand ? hand.seatBets["0"] || hand.seatBets[0] || 0 : 0;
     playerEl.querySelector(".seat-bet").textContent =
       playerBet > 0 ? "$" + playerBet : "";
 
@@ -504,14 +509,18 @@
       const minRaiseTo = hand.currentBet + hand.lastRaiseAmount;
       // Max raise-to = currentBet + min(maxHandBet per raise, chips available after calling)
       const maxHandBet = state.maxHandBet || 150;
-      const chipsAfterCall = Math.max(0, (state.playerChips || 0) - currentToCall);
+      const chipsAfterCall = Math.max(
+        0,
+        (state.playerChips || 0) - currentToCall,
+      );
       const maxRaiseTo = hand.currentBet + Math.min(maxHandBet, chipsAfterCall);
       const slider = document.getElementById("raise-slider");
       slider.min = minRaiseTo;
       slider.max = Math.max(minRaiseTo, maxRaiseTo);
       slider.value = minRaiseTo;
       document.getElementById("raise-amount").textContent = "to $" + minRaiseTo;
-      document.getElementById("btn-raise-open").hidden = minRaiseTo >= maxRaiseTo;
+      document.getElementById("btn-raise-open").hidden =
+        minRaiseTo >= maxRaiseTo;
 
       document.getElementById("action-base").hidden = false;
       document.getElementById("action-raise").hidden = true;
@@ -528,7 +537,7 @@
 
   async function dealHand() {
     try {
-      const result = await apiFetch("/api/poker/deal", "POST");
+      const result = await apiFetch("/api/poker/deal", "POST", { gameId });
 
       clearTableVisuals();
 
@@ -573,7 +582,11 @@
         : 0;
 
     try {
-      const result = await apiFetch("/api/poker/action", "POST", body);
+      const result = await apiFetch(
+        "/api/poker/action",
+        "POST",
+        Object.assign({ gameId }, body),
+      );
 
       // Animate everything that happened: AI moves, community card reveals, etc.
       // This also plays out the rest of the hand if the player folded.
@@ -594,12 +607,15 @@
   }
 
   function setActionsDisabled(disabled) {
-    ["btn-fold", "btn-check-call", "btn-raise-open", "btn-raise-confirm"].forEach(
-      function (id) {
-        const el = document.getElementById(id);
-        if (el) el.disabled = disabled;
-      },
-    );
+    [
+      "btn-fold",
+      "btn-check-call",
+      "btn-raise-open",
+      "btn-raise-confirm",
+    ].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) el.disabled = disabled;
+    });
   }
 
   // ============================================================
@@ -613,7 +629,9 @@
     function seatName(seat) {
       if (seat === 0) return "You";
       if (activeGameState && activeGameState.aiSeats) {
-        const ai = activeGameState.aiSeats.find(function (a) { return a.seat === seat; });
+        const ai = activeGameState.aiSeats.find(function (a) {
+          return a.seat === seat;
+        });
         if (ai) return ai.displayName;
       }
       return "Seat " + seat;
@@ -692,35 +710,48 @@
     sendAction({ action: "fold" });
   });
 
-  document.getElementById("btn-check-call").addEventListener("click", function () {
-    if (currentToCall > 0) {
-      sendAction({ action: "call", amount: currentToCall });
-    } else {
-      sendAction({ action: "check" });
-    }
-  });
+  document
+    .getElementById("btn-check-call")
+    .addEventListener("click", function () {
+      if (currentToCall > 0) {
+        sendAction({ action: "call", amount: currentToCall });
+      } else {
+        sendAction({ action: "check" });
+      }
+    });
 
-  document.getElementById("btn-raise-open").addEventListener("click", function () {
-    document.getElementById("action-base").hidden = true;
-    document.getElementById("action-raise").hidden = false;
-  });
+  document
+    .getElementById("btn-raise-open")
+    .addEventListener("click", function () {
+      document.getElementById("action-base").hidden = true;
+      document.getElementById("action-raise").hidden = false;
+    });
 
-  document.getElementById("btn-raise-back").addEventListener("click", function () {
-    document.getElementById("action-raise").hidden = true;
-    document.getElementById("action-base").hidden = false;
-  });
+  document
+    .getElementById("btn-raise-back")
+    .addEventListener("click", function () {
+      document.getElementById("action-raise").hidden = true;
+      document.getElementById("action-base").hidden = false;
+    });
 
-  document.getElementById("raise-slider").addEventListener("input", function () {
-    document.getElementById("raise-amount").textContent = "to $" + this.value;
-  });
+  document
+    .getElementById("raise-slider")
+    .addEventListener("input", function () {
+      document.getElementById("raise-amount").textContent = "to $" + this.value;
+    });
 
-  document.getElementById("btn-raise-confirm").addEventListener("click", function () {
-    const raiseTo = parseInt(document.getElementById("raise-slider").value, 10);
-    const hand = activeGameState && activeGameState.currentHand;
-    const currentBet = hand ? hand.currentBet : 0;
-    // Server expects the raise increment above currentBet, not the new total
-    sendAction({ action: "raise", amount: raiseTo - currentBet });
-  });
+  document
+    .getElementById("btn-raise-confirm")
+    .addEventListener("click", function () {
+      const raiseTo = parseInt(
+        document.getElementById("raise-slider").value,
+        10,
+      );
+      const hand = activeGameState && activeGameState.currentHand;
+      const currentBet = hand ? hand.currentBet : 0;
+      // Server expects the raise increment above currentBet, not the new total
+      sendAction({ action: "raise", amount: raiseTo - currentBet });
+    });
 
   // ============================================================
   // Welcome popup
@@ -911,8 +942,7 @@
             activeSeat: hand.activeSeat,
             activeSeats: hand.activeSeats || [],
             playerCards:
-              (hand.holeCards &&
-                (hand.holeCards["0"] || hand.holeCards[0])) ||
+              (hand.holeCards && (hand.holeCards["0"] || hand.holeCards[0])) ||
               [],
             seatBets: hand.seatBets || {},
             foldedSeats: hand.foldedSeats || [],

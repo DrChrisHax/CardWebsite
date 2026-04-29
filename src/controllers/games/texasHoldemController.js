@@ -121,9 +121,11 @@ async function newGame(req, res) {
 // ============================================================
 
 async function deal(req, res) {
+  const { gameId } = req.body;
+  if (!gameId) return res.status(400).json({ error: "gameId required" });
   try {
     const [gameState, user] = await Promise.all([
-      GameState.findOne({ userId: req.userId, status: "active" }),
+      GameState.findOne({ userId: req.userId, gameId, status: "active" }),
       User.findById(req.userId).select("username balance"),
     ]);
 
@@ -146,9 +148,11 @@ async function deal(req, res) {
 // ============================================================
 
 async function playerAction(req, res) {
+  const { gameId } = req.body;
+  if (!gameId) return res.status(400).json({ error: "gameId required" });
   try {
     const [gameState, user] = await Promise.all([
-      GameState.findOne({ userId: req.userId, status: "active" }),
+      GameState.findOne({ userId: req.userId, gameId, status: "active" }),
       User.findById(req.userId).select("username balance"),
     ]);
 
