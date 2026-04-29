@@ -21,7 +21,9 @@
       </section>
 
       <section class="profile-danger-zone">
-        <button class="btn-deactivate" id="btn-deactivate">Deactivate Account</button>
+        <button class="btn-deactivate" id="btn-deactivate">
+          Deactivate Account
+        </button>
         <button class="btn-delete" id="btn-delete">Delete Account</button>
       </section>
     </main>
@@ -30,11 +32,19 @@
     <div class="modal-overlay" id="modal-deactivate" hidden>
       <div class="modal">
         <h2>Deactivate Account</h2>
-        <p>Your account will be deactivated. You can contact support to reactivate it.</p>
+        <p>
+          Your account will be deactivated. You can contact support to
+          reactivate it.
+        </p>
         <!-- user accounts deactivated for 30 days will be deleted -->
         <div class="modal-actions">
           <button class="modal-cancel" id="deactivate-cancel">Cancel</button>
-          <button class="modal-confirm modal-confirm--warn" id="deactivate-confirm">Deactivate</button>
+          <button
+            class="modal-confirm modal-confirm--warn"
+            id="deactivate-confirm"
+          >
+            Deactivate
+          </button>
         </div>
       </div>
     </div>
@@ -43,10 +53,18 @@
     <div class="modal-overlay" id="modal-delete" hidden>
       <div class="modal">
         <h2>Delete Account</h2>
-        <p>This will permanently delete your account and all associated data. This cannot be undone.</p>
+        <p>
+          This will permanently delete your account and all associated data.
+          This cannot be undone.
+        </p>
         <div class="modal-actions">
           <button class="modal-cancel" id="delete-cancel">Cancel</button>
-          <button class="modal-confirm modal-confirm--danger" id="delete-confirm">Delete</button>
+          <button
+            class="modal-confirm modal-confirm--danger"
+            id="delete-confirm"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>

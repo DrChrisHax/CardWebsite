@@ -27,6 +27,7 @@ const {
 const {
   deactivateAccount,
   deleteAccount,
+  reactivateAccount,
 } = require("../controllers/profileController");
 const { requireAuth } = require("../middleware/auth");
 
@@ -88,6 +89,7 @@ router.patch("/api/user/settings/:name", requireAuth, updateSetting);
 
 router.patch("/api/user/deactivate", requireAuth, deactivateAccount);
 router.delete("/api/user/delete", requireAuth, deleteAccount);
+router.post("/api/user/reactivate", reactivateAccount);
 
 // ============================================================
 // Texas Hold'em

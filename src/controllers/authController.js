@@ -94,6 +94,10 @@ async function login(req, res) {
       return res.status(401).json({ error: "Invalid login credentials" });
     }
 
+    if (user.deactivatedOn) {
+      return res.status(403).json({ error: "account_deactivated" });
+    }
+
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });

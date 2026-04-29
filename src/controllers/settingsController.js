@@ -23,7 +23,7 @@ async function updateSetting(req, res) {
     const setting = await UserSetting.findOneAndUpdate(
       { userId: req.userId, settingName: name },
       { value: value.trim() },
-      { new: true },
+      { returnDocument: "after" },
     ).select("settingName value -_id");
 
     if (!setting) return res.status(404).json({ error: "Setting not found" });

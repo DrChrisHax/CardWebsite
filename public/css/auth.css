@@ -156,3 +156,74 @@
   font-size: 0.9rem;
   color: var(--text-muted);
 }
+
+/* Deactivated account modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.auth-modal {
+  background: rgba(6, 8, 16, 0.97);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 380px;
+  width: 100%;
+  backdrop-filter: blur(14px);
+}
+
+.auth-modal h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.auth-modal p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.auth-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.auth-modal-cancel {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  transition: background var(--transition);
+}
+
+.auth-modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.auth-modal-confirm {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: none;
+  font-weight: 600;
+  background: var(--gradient);
+  color: #fff;
+  transition: opacity var(--transition);
+}
+
+.auth-modal-confirm:hover {
+  opacity: 0.85;
+}
