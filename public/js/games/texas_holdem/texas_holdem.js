@@ -43,13 +43,12 @@
 
   function cardUrl(code, large) {
     const set = large ? CARD_SET_LARGE : CARD_SET_SMALL;
-    return (
-      "/res/" + encodeURIComponent(set) + "/" + code.replace("T", "10") + ".png"
-    );
+    return "/res/cards/" + encodeURIComponent(set) + "/" + code + ".png";
   }
 
   function cardBackUrl() {
-    return "/res/" + encodeURIComponent(CARD_SET_SMALL) + "/CardBack.png";
+    // CardBackBlue only exists in Large and Medium sets, not Small
+    return "/res/cards/" + encodeURIComponent(CARD_SET_LARGE) + "/CardBackBlue.png";
   }
 
   // Dealer button positions within #table-surface for each seat
