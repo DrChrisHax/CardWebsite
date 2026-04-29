@@ -450,13 +450,18 @@ class GameManager {
     gameState.markModified("currentHand");
     gameState.updatedAt = new Date();
 
+    const playerEliminated = user.balance === 0;
+    const activeCount = this._getActiveSeats(gameState, user).length;
+    const gameOver = activeCount < 2;
+
+    if (gameOver || playerEliminated) {
+      gameState.status = "completed";
+    }
+
     await Promise.all([
       gameState.save(),
       User.findByIdAndUpdate(gameState.userId, { balance: user.balance }),
     ]);
-
-    const playerEliminated = user.balance === 0;
-    const activeCount = this._getActiveSeats(gameState, user).length;
 
     return {
       state: this.buildStateResponse(gameState, user),
@@ -466,7 +471,7 @@ class GameManager {
         sidePots,
         revealedHands,
         playerEliminated,
-        gameOver: activeCount < 2,
+        gameOver,
       },
     };
   }
