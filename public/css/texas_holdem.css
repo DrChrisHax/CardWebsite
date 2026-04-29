@@ -391,6 +391,7 @@
 
 .seat-folded {
   opacity: 0.4;
+  transition: opacity 0.35s ease;
 }
 
 .seat-allin .seat-chips::after {
@@ -480,16 +481,55 @@
 /* Winning card highlight                                        */
 /* ============================================================ */
 
+@keyframes card-deal {
+  from { opacity: 0; transform: translateY(-6px) scale(0.82); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+.card-img.dealing {
+  animation: card-deal 0.18s ease-out forwards;
+}
+
+@keyframes bet-flash {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.seat-bet.flash {
+  animation: bet-flash 0.22s ease-out forwards;
+}
+
+@keyframes winner-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px #f1c40f, 0 0 10px rgba(241, 196, 15, 0.65); }
+  50%       { box-shadow: 0 0 0 3px #f1c40f, 0 0 22px rgba(241, 196, 15, 0.95); }
+}
+
 .card-winner {
-  box-shadow:
-    0 0 0 2px #f1c40f,
-    0 0 10px rgba(241, 196, 15, 0.65);
+  box-shadow: 0 0 0 2px #f1c40f, 0 0 10px rgba(241, 196, 15, 0.65);
   border-radius: 3px;
+  animation: winner-pulse 0.65s ease-in-out 1 forwards;
+}
+
+@keyframes overlay-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+#result-overlay:not([hidden]) {
+  animation: overlay-fade 0.35s ease forwards;
 }
 
 /* ============================================================ */
 /* Hand result overlay                                           */
 /* ============================================================ */
+
+/* Override th-overlay defaults so seats and revealed cards stay visible */
+#result-overlay {
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: none;
+  align-items: flex-start;
+  padding-top: 28%;
+}
 
 #result-text {
   font-size: 1.15rem;

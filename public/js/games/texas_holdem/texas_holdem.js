@@ -62,6 +62,278 @@
   };
 
   // ============================================================
+  // Animation helpers
+  // ============================================================
+
+  // Deliberate UX pause (e.g. between last bot action and card reveal).
+  function pause(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  // Wait for a CSS animation to end on an element.
+  // Safety cap so a missed animationend never hangs the game.
+  function waitForAnimation(el, capMs) {
+    return new Promise(function (resolve) {
+      var done = false;
+      function finish() {
+        if (!done) { done = true; resolve(); }
+      }
+      el.addEventListener("animationend", finish, { once: true });
+      setTimeout(finish, capMs || 800);
+    });
+  }
+
+  // Wait for a CSS transition to end on an element.
+  function waitForTransition(el, capMs) {
+    return new Promise(function (resolve) {
+      var done = false;
+      function finish() {
+        if (!done) { done = true; resolve(); }
+      }
+      el.addEventListener("transitionend", finish, { once: true });
+      setTimeout(finish, capMs || 800);
+    });
+  }
+
+  // Flash a bet badge text at a seat, awaiting the entry animation.
+  async function showBetBadge(seat, text) {
+    const betEl = document.querySelector("#seat-" + seat + " .seat-bet");
+    if (!betEl) return;
+    betEl.textContent = text;
+    betEl.classList.remove("flash");
+    void betEl.offsetWidth; // force reflow to restart animation
+    betEl.classList.add("flash");
+    await waitForAnimation(betEl, 400);
+    betEl.classList.remove("flash");
+  }
+
+  // Append a card back to a seat's card area and wait for its deal animation.
+  async function dealCardBack(seat) {
+    const el = document.getElementById("seat-" + seat);
+    if (!el || el.hidden) return;
+    const cardsEl = el.querySelector(".seat-cards");
+    const img = document.createElement("img");
+    img.src = cardBackUrl();
+    img.className = "card-img dealing";
+    cardsEl.appendChild(img);
+    await waitForAnimation(img, 400);
+    img.classList.remove("dealing");
+  }
+
+  // Reveal one community card slot and wait for its deal animation.
+  async function revealCommunityCard(slot, code) {
+    let img = slot.querySelector("img");
+    if (!img) {
+      img = document.createElement("img");
+      img.style.cssText =
+        "width:100%;height:100%;object-fit:contain;border-radius:4px;display:block;";
+      slot.appendChild(img);
+    }
+    img.src = cardUrl(code, true);
+    img.classList.add("dealing");
+    slot.classList.add("has-card");
+    await waitForAnimation(img, 400);
+    img.classList.remove("dealing");
+  }
+
+  // Fade a seat to folded opacity, then clear its cards.
+  async function animateFold(seatNum) {
+    const el = document.getElementById("seat-" + seatNum);
+    if (!el) return;
+    el.classList.add("seat-folded");
+    await waitForTransition(el, 500);
+    el.querySelector(".seat-cards").innerHTML = "";
+  }
+
+  // Deal card backs to all active seats (two rounds), then flip player cards face-up.
+  async function animateDeal(state) {
+    const hand = state.currentHand;
+    if (!hand) return;
+
+    const activeSeats = hand.activeSeats;
+    const dealerIdx = activeSeats.indexOf(state.dealerSeat);
+    const dealOrder = [];
+    for (let i = 1; i <= activeSeats.length; i++) {
+      dealOrder.push(activeSeats[(dealerIdx + i) % activeSeats.length]);
+    }
+
+    // Two cards dealt one at a time around the table — each waits for its animation
+    for (let round = 0; round < 2; round++) {
+      for (const seat of dealOrder) {
+        await dealCardBack(seat);
+      }
+    }
+
+    // Replace player's card backs with face-up cards
+    const playerCardsEl = document.querySelector("#seat-0 .seat-cards");
+    if (playerCardsEl && hand.playerCards && hand.playerCards.length) {
+      playerCardsEl.innerHTML = "";
+      const flips = hand.playerCards.map(function (code) {
+        const img = document.createElement("img");
+        img.src = cardUrl(code, false);
+        img.className = "card-img dealing";
+        playerCardsEl.appendChild(img);
+        return waitForAnimation(img, 400).then(function () {
+          img.classList.remove("dealing");
+        });
+      });
+      await Promise.all(flips);
+    }
+  }
+
+  // Step through action log entries sequentially, driving each step by animation completion.
+  // commCardsStart = how many community cards were already visible before this log.
+  async function animateActionLog(log, commCardsStart) {
+    let commCardsRevealed = commCardsStart || 0;
+
+    // Seed running totals from the last known state so chip/pot updates are accurate
+    const hand = activeGameState && activeGameState.currentHand;
+    let runningCurrentBet = hand ? (hand.currentBet || 0) : 0;
+    let runningPot = hand ? (hand.pot || 0) : 0;
+
+    const runningChips = {};
+    const runningSeatBets = {};
+    if (activeGameState) {
+      (activeGameState.aiSeats || []).forEach(function (ai) {
+        runningChips[ai.seat] = ai.chips || 0;
+        runningSeatBets[String(ai.seat)] = hand
+          ? hand.seatBets[String(ai.seat)] || 0
+          : 0;
+      });
+      runningChips[0] = activeGameState.playerChips || 0;
+      runningSeatBets["0"] = hand
+        ? hand.seatBets["0"] || hand.seatBets[0] || 0
+        : 0;
+    }
+
+    function updateSeatChips(seat) {
+      const el = document.getElementById("seat-" + seat);
+      if (!el) return;
+      const chips = runningChips[seat];
+      if (chips !== undefined)
+        el.querySelector(".seat-chips").textContent =
+          "$" + chips.toLocaleString("en-US");
+    }
+
+    function updatePot() {
+      const potEl = document.getElementById("pot-display");
+      if (runningPot > 0) {
+        potEl.textContent = "Pot: $" + runningPot;
+        potEl.hidden = false;
+      }
+    }
+
+    for (const entry of log) {
+      if (entry.type === "blind") {
+        const chipsMoved = entry.amount || 0;
+        runningPot += chipsMoved;
+        runningChips[entry.seat] = (runningChips[entry.seat] || 0) - chipsMoved;
+        runningSeatBets[String(entry.seat)] =
+          (runningSeatBets[String(entry.seat)] || 0) + chipsMoved;
+        runningCurrentBet = Math.max(
+          runningCurrentBet,
+          runningSeatBets[String(entry.seat)],
+        );
+        const label =
+          entry.action === "smallBlind"
+            ? "SB $" + entry.amount
+            : "BB $" + entry.amount;
+        await showBetBadge(entry.seat, label);
+        updateSeatChips(entry.seat);
+        updatePot();
+      } else if (entry.type === "action") {
+        const el = document.getElementById("seat-" + entry.seat);
+        if (!el) continue;
+
+        const seat = entry.seat;
+        const seatKey = String(seat);
+        const prevBet = runningSeatBets[seatKey] || 0;
+        const chips = runningChips[seat] || 0;
+
+        if (entry.action === "fold") {
+          await Promise.all([
+            showBetBadge(seat, "Fold"),
+            animateFold(seat),
+          ]);
+        } else if (entry.action === "check") {
+          await showBetBadge(seat, "Check");
+        } else if (entry.action === "call") {
+          const toCall = Math.max(0, runningCurrentBet - prevBet);
+          const chipsMoved = Math.min(toCall, chips);
+          runningPot += chipsMoved;
+          runningChips[seat] -= chipsMoved;
+          runningSeatBets[seatKey] = prevBet + chipsMoved;
+          await showBetBadge(seat, "Call $" + chipsMoved);
+          updateSeatChips(seat);
+          updatePot();
+        } else if (entry.action === "raise") {
+          const newBetLevel = runningCurrentBet + (entry.amount || 0);
+          const additional = newBetLevel - prevBet;
+          const chipsMoved = Math.min(additional, chips);
+          runningPot += chipsMoved;
+          runningChips[seat] -= chipsMoved;
+          runningSeatBets[seatKey] = prevBet + chipsMoved;
+          runningCurrentBet = newBetLevel;
+          await showBetBadge(seat, "Raise to $" + newBetLevel);
+          updateSeatChips(seat);
+          updatePot();
+        } else if (entry.action === "all_in") {
+          const chipsMoved = chips;
+          runningPot += chipsMoved;
+          runningChips[seat] = 0;
+          runningSeatBets[seatKey] = prevBet + chipsMoved;
+          if (runningSeatBets[seatKey] > runningCurrentBet)
+            runningCurrentBet = runningSeatBets[seatKey];
+          el.classList.add("seat-allin");
+          await showBetBadge(seat, "All In");
+          updateSeatChips(seat);
+          updatePot();
+        }
+      } else if (entry.type === "deal") {
+        runningCurrentBet = 0;
+        Object.keys(runningSeatBets).forEach(function (k) {
+          runningSeatBets[k] = 0;
+        });
+        document.querySelectorAll(".seat-bet").forEach(function (el) {
+          el.textContent = "";
+        });
+        await pause(500);
+        const slots = document.querySelectorAll("#community-cards .card-slot");
+        for (let i = 0; i < entry.cards.length; i++) {
+          const slot = slots[commCardsRevealed];
+          if (!slot) continue;
+          await revealCommunityCard(slot, entry.cards[i]);
+          commCardsRevealed++;
+        }
+      }
+    }
+  }
+
+  // ============================================================
+  // Table visual reset (called before dealing a new hand)
+  // ============================================================
+
+  function clearTableVisuals() {
+    document.querySelectorAll(".seat-cards").forEach(function (el) {
+      el.innerHTML = "";
+    });
+    document
+      .querySelectorAll("#community-cards .card-slot")
+      .forEach(function (slot) {
+        slot.innerHTML = "";
+        slot.classList.remove("has-card");
+      });
+    document.querySelectorAll(".seat-bet").forEach(function (el) {
+      el.textContent = "";
+    });
+    document.querySelectorAll(".seat").forEach(function (el) {
+      el.classList.remove("seat-folded", "seat-allin");
+    });
+    document.getElementById("pot-display").hidden = true;
+    document.getElementById("action-area").hidden = true;
+  }
+
+  // ============================================================
   // Init
   // ============================================================
 
@@ -139,7 +411,9 @@
       const bet = hand
         ? hand.seatBets[String(ai.seat)] || hand.seatBets[ai.seat] || 0
         : 0;
-      el.querySelector(".seat-bet").textContent = bet > 0 ? "$" + bet : "";
+      // Only overwrite badge when there's a real chip amount, animated labels
+      // (Check, Fold, etc.) persist until the next street clears them.
+      if (bet > 0) el.querySelector(".seat-bet").textContent = "$" + bet;
 
       const cardsEl = el.querySelector(".seat-cards");
       cardsEl.innerHTML = "";
@@ -158,7 +432,9 @@
     playerEl.querySelector(".seat-chips").textContent =
       "$" + (state.playerChips || 0).toLocaleString("en-US");
 
-    const playerBet = hand ? hand.seatBets["0"] || hand.seatBets[0] || 0 : 0;
+    const playerBet = hand
+      ? hand.seatBets["0"] || hand.seatBets[0] || 0
+      : 0;
     playerEl.querySelector(".seat-bet").textContent =
       playerBet > 0 ? "$" + playerBet : "";
 
@@ -221,14 +497,16 @@
       checkCallBtn.textContent =
         currentToCall > 0 ? "Call $" + currentToCall : "Check";
 
-      const minRaise = hand.currentBet + hand.lastRaiseAmount;
-      const maxRaise = Math.min(state.playerChips || 0, 150);
+      // Slider represents "raise to" level (new total bet). Server receives the
+      // increment (sliderValue - currentBet), computed in the confirm handler.
+      const minRaiseTo = hand.currentBet + hand.lastRaiseAmount;
+      const maxRaiseTo = hand.currentBet + Math.max(0, (state.playerChips || 0) - currentToCall);
       const slider = document.getElementById("raise-slider");
-      slider.min = minRaise;
-      slider.max = maxRaise;
-      slider.value = minRaise;
-      document.getElementById("raise-amount").textContent = "$" + minRaise;
-      document.getElementById("btn-raise-open").hidden = minRaise > maxRaise;
+      slider.min = minRaiseTo;
+      slider.max = Math.max(minRaiseTo, maxRaiseTo);
+      slider.value = minRaiseTo;
+      document.getElementById("raise-amount").textContent = "to $" + minRaiseTo;
+      document.getElementById("btn-raise-open").hidden = minRaiseTo >= maxRaiseTo;
 
       document.getElementById("action-base").hidden = false;
       document.getElementById("action-raise").hidden = true;
@@ -246,9 +524,28 @@
   async function dealHand() {
     try {
       const result = await apiFetch("/api/poker/deal", "POST");
-      renderState(result.state);
-      // Action log animation will be added in a later step
-      if (result.handResult) showHandResult(result.handResult);
+
+      clearTableVisuals();
+
+      // Position dealer button immediately (no animation needed per spec)
+      const pos = DEALER_POS[result.state.dealerSeat];
+      if (pos) {
+        const btn = document.getElementById("dealer-btn");
+        btn.style.left = pos.left;
+        btn.style.top = pos.top;
+      }
+
+      await animateDeal(result.state);
+      await animateActionLog(result.actionLog, 0);
+
+      if (result.handResult) {
+        // Hand ended without a player turn (extremely rare) — store state and show result
+        activeGameState = result.state;
+        playerData.chips = result.state.playerChips;
+        showHandResult(result.handResult);
+      } else {
+        renderState(result.state);
+      }
     } catch (err) {
       console.error("deal failed:", err);
     }
@@ -259,12 +556,32 @@
   // ============================================================
 
   async function sendAction(body) {
+    document.getElementById("action-area").hidden = true;
     setActionsDisabled(true);
+
+    // Remember how many community cards were showing before this action
+    const commCardsBefore =
+      activeGameState &&
+      activeGameState.currentHand &&
+      activeGameState.currentHand.communityCards
+        ? activeGameState.currentHand.communityCards.length
+        : 0;
+
     try {
       const result = await apiFetch("/api/poker/action", "POST", body);
-      renderState(result.state);
-      // Action log animation will be added in a later step
-      if (result.handResult) showHandResult(result.handResult);
+
+      // Animate everything that happened: AI moves, community card reveals, etc.
+      // This also plays out the rest of the hand if the player folded.
+      await animateActionLog(result.actionLog, commCardsBefore);
+
+      if (result.handResult) {
+        // Hand is over — store updated state for showHandResult to reference
+        activeGameState = result.state;
+        playerData.chips = result.state.playerChips;
+        showHandResult(result.handResult);
+      } else {
+        renderState(result.state);
+      }
     } catch (err) {
       console.error("action failed:", err);
       setActionsDisabled(false);
@@ -272,24 +589,22 @@
   }
 
   function setActionsDisabled(disabled) {
-    [
-      "btn-fold",
-      "btn-check-call",
-      "btn-raise-open",
-      "btn-raise-confirm",
-    ].forEach(function (id) {
-      const el = document.getElementById(id);
-      if (el) el.disabled = disabled;
-    });
+    ["btn-fold", "btn-check-call", "btn-raise-open", "btn-raise-confirm"].forEach(
+      function (id) {
+        const el = document.getElementById(id);
+        if (el) el.disabled = disabled;
+      },
+    );
   }
 
   // ============================================================
   // Show hand result
   // ============================================================
 
-  function showHandResult(handResult) {
+  async function showHandResult(handResult) {
     const resultEl = document.getElementById("result-text");
 
+    // Build winner text
     if (handResult.winners && handResult.winners.length > 1) {
       const total = handResult.winners.reduce(function (s, w) {
         return s + w.amount;
@@ -308,17 +623,23 @@
       } else {
         name = "Seat " + w.seat;
       }
-      const handDesc = w.handType ? " with <em>" + w.handType + "</em>" : "";
+      const handDesc = w.handName ? " with <em>" + w.handName + "</em>" : "";
       resultEl.innerHTML =
         "<strong>" + name + "</strong> wins $" + w.amount + handDesc;
     }
 
-    // Reveal AI cards on showdown
-    if (handResult.revealedHands) {
+    // Reveal AI cards on showdown (revealedHands = { seatKey: { cards, handName } })
+    const isShowdown =
+      handResult.revealedHands &&
+      Object.keys(handResult.revealedHands).length > 0;
+
+    if (isShowdown) {
       Object.keys(handResult.revealedHands).forEach(function (seatKey) {
-        const cards = handResult.revealedHands[seatKey];
+        const entry = handResult.revealedHands[seatKey];
+        // entry is { cards, handName } for showdown seats
+        const cards = entry && entry.cards ? entry.cards : entry;
         const el = document.getElementById("seat-" + seatKey);
-        if (!el) return;
+        if (!el || !cards) return;
         const cardsEl = el.querySelector(".seat-cards");
         cardsEl.innerHTML = "";
         cards.forEach(function (code) {
@@ -328,47 +649,42 @@
           cardsEl.appendChild(img);
         });
       });
+
+      // Highlight the winning seat's hole cards
+      if (handResult.winners && handResult.winners.length > 0) {
+        const winnerSeat = handResult.winners[0].seat;
+        const winnerEl = document.getElementById("seat-" + winnerSeat);
+        if (winnerEl) {
+          winnerEl.querySelectorAll(".card-img").forEach(function (img) {
+            img.classList.add("card-winner");
+          });
+        }
+      }
     }
 
-    // Winning card highlight will be added in a later step
+    // Wait for the winner-pulse animation on any highlighted card before showing overlay
+    const winnerImg = document.querySelector(".card-winner");
+    if (winnerImg) {
+      await waitForAnimation(winnerImg, 1000);
+    }
 
-    document.getElementById("result-overlay").hidden = false;
+    // Show result overlay — CSS drives its fade-in; wait for that to complete
+    const overlay = document.getElementById("result-overlay");
+    overlay.hidden = false;
+    await waitForAnimation(overlay, 600);
 
-    document
-      .getElementById("result-overlay")
-      .addEventListener("click", function handler() {
-        document
-          .getElementById("result-overlay")
-          .removeEventListener("click", handler);
-        document.getElementById("result-overlay").hidden = true;
+    overlay.addEventListener("click", function handler() {
+      overlay.removeEventListener("click", handler);
+      overlay.hidden = true;
 
-        if (handResult.playerEliminated || handResult.gameOver) {
-          window.location.replace("/home");
-          return;
-        }
+      if (handResult.playerEliminated || handResult.gameOver) {
+        window.location.replace("/home");
+        return;
+      }
 
-        // Clear dynamic state for next hand
-        document.querySelectorAll(".seat-cards").forEach(function (el) {
-          el.innerHTML = "";
-        });
-        document
-          .querySelectorAll("#community-cards .card-slot")
-          .forEach(function (slot) {
-            slot.innerHTML = "";
-            slot.classList.remove("has-card");
-          });
-        document.querySelectorAll(".seat-bet").forEach(function (el) {
-          el.textContent = "";
-        });
-        document
-          .querySelectorAll(".seat-folded, .seat-allin")
-          .forEach(function (el) {
-            el.classList.remove("seat-folded", "seat-allin");
-          });
-        document.getElementById("pot-display").hidden = true;
-
-        dealHand();
-      });
+      clearTableVisuals();
+      dealHand();
+    });
   }
 
   // ============================================================
@@ -379,45 +695,35 @@
     sendAction({ action: "fold" });
   });
 
-  document
-    .getElementById("btn-check-call")
-    .addEventListener("click", function () {
-      if (currentToCall > 0) {
-        sendAction({ action: "call", amount: currentToCall });
-      } else {
-        sendAction({ action: "check" });
-      }
-    });
+  document.getElementById("btn-check-call").addEventListener("click", function () {
+    if (currentToCall > 0) {
+      sendAction({ action: "call", amount: currentToCall });
+    } else {
+      sendAction({ action: "check" });
+    }
+  });
 
-  document
-    .getElementById("btn-raise-open")
-    .addEventListener("click", function () {
-      document.getElementById("action-base").hidden = true;
-      document.getElementById("action-raise").hidden = false;
-    });
+  document.getElementById("btn-raise-open").addEventListener("click", function () {
+    document.getElementById("action-base").hidden = true;
+    document.getElementById("action-raise").hidden = false;
+  });
 
-  document
-    .getElementById("btn-raise-back")
-    .addEventListener("click", function () {
-      document.getElementById("action-raise").hidden = true;
-      document.getElementById("action-base").hidden = false;
-    });
+  document.getElementById("btn-raise-back").addEventListener("click", function () {
+    document.getElementById("action-raise").hidden = true;
+    document.getElementById("action-base").hidden = false;
+  });
 
-  document
-    .getElementById("raise-slider")
-    .addEventListener("input", function () {
-      document.getElementById("raise-amount").textContent = "$" + this.value;
-    });
+  document.getElementById("raise-slider").addEventListener("input", function () {
+    document.getElementById("raise-amount").textContent = "to $" + this.value;
+  });
 
-  document
-    .getElementById("btn-raise-confirm")
-    .addEventListener("click", function () {
-      const amount = parseInt(
-        document.getElementById("raise-slider").value,
-        10,
-      );
-      sendAction({ action: "raise", amount });
-    });
+  document.getElementById("btn-raise-confirm").addEventListener("click", function () {
+    const raiseTo = parseInt(document.getElementById("raise-slider").value, 10);
+    const hand = activeGameState && activeGameState.currentHand;
+    const currentBet = hand ? hand.currentBet : 0;
+    // Server expects the raise increment above currentBet, not the new total
+    sendAction({ action: "raise", amount: raiseTo - currentBet });
+  });
 
   // ============================================================
   // Welcome popup
@@ -606,8 +912,10 @@
             currentBet: hand.currentBet || 0,
             lastRaiseAmount: hand.lastRaiseAmount || 0,
             activeSeat: hand.activeSeat,
+            activeSeats: hand.activeSeats || [],
             playerCards:
-              (hand.holeCards && (hand.holeCards["0"] || hand.holeCards[0])) ||
+              (hand.holeCards &&
+                (hand.holeCards["0"] || hand.holeCards[0])) ||
               [],
             seatBets: hand.seatBets || {},
             foldedSeats: hand.foldedSeats || [],
