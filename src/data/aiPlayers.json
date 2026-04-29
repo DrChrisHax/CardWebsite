@@ -16,5 +16,11 @@
     "model": "CallBot",
     "gameName": "Texas Hold'em",
     "active": true
+  },
+  {
+    "playerName": "Fold Bot",
+    "model": "FoldBot",
+    "gameName": "Texas Hold'em",
+    "active": true
   }
 ]
