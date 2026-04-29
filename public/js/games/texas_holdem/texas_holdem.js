@@ -369,7 +369,7 @@
       el.querySelector(".seat-chips").textContent =
         "$" + ai.chips.toLocaleString("en-US");
       el.querySelector(".seat-model-tip").textContent = ai.model || "";
-      el.hidden = false;
+      el.hidden = ai.chips === 0;
     });
 
     const playerEl = document.getElementById("seat-0");
@@ -394,6 +394,8 @@
       const el = document.getElementById("seat-" + ai.seat);
       if (!el) return;
 
+      const inCurrentHand = hand && (hand.activeSeats || []).includes(ai.seat);
+      el.hidden = ai.chips === 0 && !inCurrentHand;
       el.querySelector(".seat-chips").textContent =
         "$" + ai.chips.toLocaleString("en-US");
 
@@ -670,7 +672,9 @@
           "$" + (activeGameState.playerChips || 0).toLocaleString("en-US");
         (activeGameState.aiSeats || []).forEach(function (ai) {
           const el = document.getElementById("seat-" + ai.seat);
-          if (el) el.querySelector(".seat-chips").textContent =
+          if (!el) return;
+          el.hidden = ai.chips === 0;
+          el.querySelector(".seat-chips").textContent =
             "$" + ai.chips.toLocaleString("en-US");
         });
       }
