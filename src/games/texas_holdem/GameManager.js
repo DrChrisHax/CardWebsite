@@ -224,9 +224,7 @@ class GameManager {
         break;
       }
 
-      case ActionType.ALL_IN:
-      case "allin":
-      case "all_in": {
+      case ActionType.ALL_IN: {
         const allInAmount = chips;
         const newBet = prevBet + allInAmount;
         this._setChips(seat, 0, gameState, user);
@@ -352,7 +350,7 @@ class GameManager {
         state.chipsToCall + action.amount <= state.stack
       );
     }
-    if (t === ActionType.ALL_IN || t === "allin" || t === "all_in")
+    if (t === ActionType.ALL_IN)
       return state.stack > 0;
     return false;
   }

@@ -182,7 +182,7 @@ async function playerAction(req, res) {
         amount >= hand.lastRaiseAmount &&
         amount <= MAX_HAND_BET &&
         toCall + amount <= chips;
-    } else if (action === "allin" || action === "all_in") valid = chips > 0;
+    } else if (action === "all_in") valid = chips > 0;
 
     if (!valid) return res.status(400).json({ error: "Invalid action" });
 
