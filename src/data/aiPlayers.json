@@ -3,11 +3,17 @@
     "playerName": "Alpha",
     "model": "BaseEngine",
     "gameName": "Texas Hold'em",
-    "active": true
+    "active": false
   },
   {
     "playerName": "Beta",
     "model": "BaseEngine",
+    "gameName": "Texas Hold'em",
+    "active": false
+  },
+  {
+    "playerName": "Call Bot",
+    "model": "CallBot",
     "gameName": "Texas Hold'em",
     "active": true
   }
