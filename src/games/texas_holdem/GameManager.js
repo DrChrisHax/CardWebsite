@@ -263,6 +263,7 @@ class GameManager {
       aiSeats: gameState.aiSeats.map((a) => ({
         seat: a.seat,
         displayName: a.displayName,
+        model: a.model,
         chips: a.chips,
         active: a.chips > 0,
       })),
@@ -274,6 +275,7 @@ class GameManager {
             currentBet: hand.currentBet,
             lastRaiseAmount: hand.lastRaiseAmount,
             activeSeat: hand.activeSeat,
+            activeSeats: hand.activeSeats,
             playerCards: hand.holeCards["0"] || [],
             seatBets: hand.seatBets,
             seatTotalBets: hand.seatTotalBets,
