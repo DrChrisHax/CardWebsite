@@ -26,6 +26,8 @@ class THGameState {
     position,
     street,
     activePlayers,
+    bigBlind,
+    streetRaises,
     actionHistory = [],
   }) {
     this.holeCards = holeCards; // string[] e.g. ['Ah', 'Kd']
@@ -38,6 +40,8 @@ class THGameState {
     this.position = position; // Position enum value
     this.street = street; // Street enum value
     this.activePlayers = activePlayers;
+    this.bigBlind = bigBlind;
+    this.streetRaises = streetRaises; // number of raises so far this street
     this.actionHistory = actionHistory; // full hand history, reserved for future bots
   }
 }

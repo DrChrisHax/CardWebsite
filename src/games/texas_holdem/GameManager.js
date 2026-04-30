@@ -112,6 +112,7 @@ class GameManager {
       foldedSeats: [],
       allInSeats,
       actedThisRound: [],
+      streetRaises: 0,
     };
 
     const actionLog = [
@@ -245,6 +246,7 @@ class GameManager {
         hand.pot += cappedAdd;
         hand.lastRaiseAmount = hand.seatBets[seatKey] - oldBet;
         hand.currentBet = hand.seatBets[seatKey];
+        hand.streetRaises += 1;
         hand.actedThisRound = [seat];
         if (newChips === 0 && !hand.allInSeats.includes(seat))
           hand.allInSeats.push(seat);
@@ -263,6 +265,7 @@ class GameManager {
         if (newBet > hand.currentBet) {
           hand.lastRaiseAmount = newBet - hand.currentBet;
           hand.currentBet = newBet;
+          hand.streetRaises += 1;
           hand.actedThisRound = [seat];
         } else {
           if (!hand.actedThisRound.includes(seat))
@@ -346,6 +349,7 @@ class GameManager {
       hand.seatBets[seatKey] = 0;
     hand.currentBet = 0;
     hand.lastRaiseAmount = 0;
+    hand.streetRaises = 0;
     hand.actedThisRound = [];
     hand.activeSeat = gameState.dealerSeat; // findNextToAct starts after dealer
 
@@ -645,6 +649,8 @@ class GameManager {
       position,
       street: hand.phase,
       activePlayers: this._nonFoldedSeats(hand).length,
+      bigBlind: this.bigBlind,
+      streetRaises: hand.streetRaises,
       actionHistory: [],
     });
   }
