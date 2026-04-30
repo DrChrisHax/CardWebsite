@@ -46,6 +46,12 @@
     return "/res/cards/" + encodeURIComponent(set) + "/" + code + ".png";
   }
 
+  const RANK_NAMES = { A:'Ace', K:'King', Q:'Queen', J:'Jack', T:'Ten', '9':'Nine', '8':'Eight', '7':'Seven', '6':'Six', '5':'Five', '4':'Four', '3':'Three', '2':'Two' };
+  const SUIT_NAMES = { h:'Hearts', d:'Diamonds', c:'Clubs', s:'Spades' };
+  function cardLabel(code) {
+    return (RANK_NAMES[code[0]] || code[0]) + ' of ' + (SUIT_NAMES[code[1]] || code[1]);
+  }
+
   function cardBackUrl() {
     // CardBackBlue only exists in Large and Medium sets, not Small
     return (
@@ -142,6 +148,7 @@
     img.src = cardUrl(code, true);
     img.classList.add("dealing");
     slot.classList.add("has-card");
+    slot.dataset.tooltip = cardLabel(code);
     await waitForAnimation(img, 400);
     img.classList.remove("dealing");
   }
@@ -471,9 +478,11 @@
           }
           img.src = cardUrl(code, true);
           slot.classList.add("has-card");
+          slot.dataset.tooltip = cardLabel(code);
         } else {
           slot.innerHTML = "";
           slot.classList.remove("has-card");
+          delete slot.dataset.tooltip;
         }
       });
 
