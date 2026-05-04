@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Metrics</title>
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/navbar.css" />
+    <link rel="stylesheet" href="/css/metrics.css" />
+    <script src="/js/auth-guard.js"></script>
+  </head>
+  <body>
+    <div class="metrics-layout">
+      <aside class="metrics-sidebar">
+        <p class="sidebar-title">My Games</p>
+        <ul class="sidebar-game-list" id="game-list"></ul>
+      </aside>
+
+      <main class="metrics-main">
+        <div class="metrics-controls">
+          <div class="control-group">
+            <label for="graph-type">Graph</label>
+            <select id="graph-type" class="metrics-select">
+              <option value="balance-per-hand">Balance Per Hand</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="session-select">Session</label>
+            <select id="session-select" class="metrics-select">
+              <option value="all">All Sessions</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chart-area">
+          <div class="chart-empty" id="chart-empty">
+            <p>No hand history found for this selection.</p>
+          </div>
+          <div class="chart-container" id="chart-container" hidden>
+            <canvas id="metrics-chart"></canvas>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="/vendor/chart.js"></script>
+    <script src="/js/navbar.js" defer></script>
+    <script src="/js/metrics.js" defer></script>
+  </body>
+</html>

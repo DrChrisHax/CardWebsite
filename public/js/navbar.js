@@ -49,6 +49,7 @@ async function createNavbar() {
         </button>
         <div class="navbar-dropdown" hidden>
           <button class="dropdown-item" id="dd-profile">Profile</button>
+          <button class="dropdown-item" id="dd-metrics" hidden>Metrics</button>
           <button class="dropdown-item" id="dd-settings">Settings</button>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item dropdown-item--danger" id="dd-logout">Log Out</button>
@@ -84,10 +85,23 @@ async function createNavbar() {
     window.location.href = "/profile";
   });
 
+  nav.querySelector("#dd-metrics").addEventListener("click", function () {
+    window.location.href = "/metrics";
+  });
+
   nav.querySelector("#dd-logout").addEventListener("click", logout);
 
-  const user = await loadUserData();
+  const [user, games] = await Promise.all([
+    loadUserData(),
+    fetch("/api/user/mygames", {
+      headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    })
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []),
+  ]);
+
   if (user) balanceEl.textContent = formatBalance(user.balance);
+  if (games.length > 0) nav.querySelector("#dd-metrics").hidden = false;
 
   window.addEventListener("balancechange", function (e) {
     balanceEl.textContent = formatBalance(e.detail.balance);

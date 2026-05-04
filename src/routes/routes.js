@@ -31,6 +31,10 @@ const {
   deleteAccount,
   reactivateAccount,
 } = require("../controllers/profileController");
+const { getGames } = require("../controllers/metrics/MetricsController");
+const {
+  getBalancePerHand,
+} = require("../controllers/metrics/TexasHoldemMetricsController");
 const { requireAuth } = require("../middleware/auth");
 
 const page = (filePath) => path.join(__dirname, "../../public/pages", filePath);
@@ -55,6 +59,7 @@ router.get("/reset-password", (req, res) =>
 
 router.get("/home", (req, res) => res.sendFile(page("home.html")));
 router.get("/profile", (req, res) => res.sendFile(page("profile.html")));
+router.get("/metrics", (req, res) => res.sendFile(page("metrics.html")));
 router.get("/games/texas_holdem", (req, res) =>
   res.sendFile(page("games/texas_holdem.html")),
 );
@@ -92,6 +97,17 @@ router.patch("/api/user/settings/:name", requireAuth, updateSetting);
 router.patch("/api/user/deactivate", requireAuth, deactivateAccount);
 router.delete("/api/user/delete", requireAuth, deleteAccount);
 router.post("/api/user/reactivate", reactivateAccount);
+
+// ============================================================
+// Metrics
+// ============================================================
+
+router.get("/api/metrics/games", requireAuth, getGames);
+router.get(
+  "/api/metrics/texas-holdem/balance-per-hand",
+  requireAuth,
+  getBalancePerHand,
+);
 
 // ============================================================
 // Texas Hold'em
