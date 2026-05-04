@@ -3,6 +3,10 @@
   display: none !important;
 }
 
+:root {
+  --game-speed: 1000ms; /* overridden by JS via setGameSpeed() on game init */
+}
+
 /* ============================================================ */
 /* Table layout                                                  */
 /* ============================================================ */
@@ -408,7 +412,7 @@
 
 .seat-folded {
   opacity: 0.4;
-  transition: opacity 0.35s ease;
+  transition: opacity calc(var(--game-speed) * 0.525) ease;
 }
 
 .seat-allin .seat-chips::after {
@@ -504,7 +508,7 @@
 }
 
 .card-img.dealing {
-  animation: card-deal 0.18s ease-out forwards;
+  animation: card-deal calc(var(--game-speed) * 0.27) ease-out forwards;
 }
 
 @keyframes bet-flash {
@@ -513,7 +517,7 @@
 }
 
 .seat-bet.flash {
-  animation: bet-flash 0.22s ease-out forwards;
+  animation: bet-flash calc(var(--game-speed) * 0.33) ease-out forwards;
 }
 
 
@@ -523,7 +527,7 @@
 }
 
 #result-overlay:not([hidden]) {
-  animation: overlay-fade 0.35s ease forwards;
+  animation: overlay-fade calc(var(--game-speed) * 0.525) ease forwards;
 }
 
 /* ============================================================ */

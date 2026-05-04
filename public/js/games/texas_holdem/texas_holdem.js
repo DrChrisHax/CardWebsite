@@ -73,6 +73,20 @@
   // Animation helpers
   // ============================================================
 
+  // Game animation speed in ms. Increase to slow down, decrease to speed up.
+  // TODO: load from user settings at game start; call setGameSpeed() when settings menu closes.
+  let gameSpeed = 1000;
+
+  function setGameSpeed(ms) {
+    gameSpeed = ms;
+    document.documentElement.style.setProperty("--game-speed", ms + "ms");
+  }
+
+  function loadGameSpeed() {
+    // TODO: fetch saved speed from user settings (API or localStorage) and call setGameSpeed().
+    setGameSpeed(gameSpeed);
+  }
+
   // Deliberate UX pause (e.g. between last bot action and card reveal).
   function pause(ms) {
     return new Promise(function (resolve) {
@@ -92,7 +106,7 @@
         }
       }
       el.addEventListener("animationend", finish, { once: true });
-      setTimeout(finish, capMs || 800);
+      setTimeout(finish, capMs || gameSpeed * 1.2);
     });
   }
 
@@ -107,7 +121,7 @@
         }
       }
       el.addEventListener("transitionend", finish, { once: true });
-      setTimeout(finish, capMs || 800);
+      setTimeout(finish, capMs || gameSpeed * 1.2);
     });
   }
 
@@ -119,7 +133,7 @@
     betEl.classList.remove("flash");
     void betEl.offsetWidth; // force reflow to restart animation
     betEl.classList.add("flash");
-    await waitForAnimation(betEl, 400);
+    await waitForAnimation(betEl, gameSpeed * 0.6);
     betEl.classList.remove("flash");
   }
 
@@ -132,7 +146,7 @@
     img.src = cardBackUrl();
     img.className = "card-img dealing";
     cardsEl.appendChild(img);
-    await waitForAnimation(img, 400);
+    await waitForAnimation(img, gameSpeed * 0.6);
     img.classList.remove("dealing");
   }
 
@@ -149,7 +163,7 @@
     img.classList.add("dealing");
     slot.classList.add("has-card");
     slot.dataset.tooltip = cardLabel(code);
-    await waitForAnimation(img, 400);
+    await waitForAnimation(img, gameSpeed * 0.6);
     img.classList.remove("dealing");
   }
 
@@ -158,7 +172,7 @@
     const el = document.getElementById("seat-" + seatNum);
     if (!el) return;
     el.classList.add("seat-folded");
-    await waitForTransition(el, 500);
+    await waitForTransition(el, gameSpeed * 0.75);
     el.querySelector(".seat-cards").innerHTML = "";
   }
 
@@ -190,7 +204,7 @@
         img.src = cardUrl(code, false);
         img.className = "card-img dealing";
         playerCardsEl.appendChild(img);
-        return waitForAnimation(img, 400).then(function () {
+        return waitForAnimation(img, gameSpeed * 0.6).then(function () {
           img.classList.remove("dealing");
         });
       });
@@ -311,7 +325,7 @@
         document.querySelectorAll(".seat-bet").forEach(function (el) {
           el.textContent = "";
         });
-        await pause(500);
+        await pause(gameSpeed * 0.75);
         const slots = document.querySelectorAll("#community-cards .card-slot");
         for (let i = 0; i < entry.cards.length; i++) {
           const slot = slots[commCardsRevealed];
@@ -352,6 +366,7 @@
   // ============================================================
 
   async function init() {
+    loadGameSpeed();
     const games = await apiFetch("/api/user/mygames");
     const thGame = games.find(function (g) {
       return g.path === "/games/texas_holdem";
@@ -678,7 +693,7 @@
     // Show result overlay — CSS drives its fade-in; wait for that to complete
     const overlay = document.getElementById("result-overlay");
     overlay.hidden = false;
-    await waitForAnimation(overlay, 600);
+    await waitForAnimation(overlay, gameSpeed * 0.9);
 
     overlay.addEventListener("click", function handler() {
       overlay.removeEventListener("click", handler);
