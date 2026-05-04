@@ -34,6 +34,8 @@ const {
 const { getGames } = require("../controllers/metrics/MetricsController");
 const {
   getBalancePerHand,
+  getNetProfitPerHand,
+  getResultsBreakdown,
 } = require("../controllers/metrics/TexasHoldemMetricsController");
 const { requireAuth } = require("../middleware/auth");
 
@@ -103,11 +105,9 @@ router.post("/api/user/reactivate", reactivateAccount);
 // ============================================================
 
 router.get("/api/metrics/games", requireAuth, getGames);
-router.get(
-  "/api/metrics/texas-holdem/balance-per-hand",
-  requireAuth,
-  getBalancePerHand,
-);
+router.get("/api/metrics/texas-holdem/balance-per-hand", requireAuth, getBalancePerHand);
+router.get("/api/metrics/texas-holdem/net-profit-per-hand", requireAuth, getNetProfitPerHand);
+router.get("/api/metrics/texas-holdem/results-breakdown", requireAuth, getResultsBreakdown);
 
 // ============================================================
 // Texas Hold'em
