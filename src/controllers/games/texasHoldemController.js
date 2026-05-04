@@ -1,9 +1,15 @@
 const GameState = require("../../models/GameState");
 const AIPlayer = require("../../models/AIPlayer");
 const User = require("../../models/User");
+const Game = require("../../models/Game");
 const GameManager = require("../../games/texas_holdem/GameManager");
-const { MIN_RAISE, MAX_HAND_BET } = require("../../games/texas_holdem/GameManager");
+const { MIN_RAISE } = require("../../games/texas_holdem/GameManager");
 const botRegistry = require("../../games/texas_holdem/botRegistry");
+
+// Old records pre-date the maxBet field; treat them as regular (capped) games.
+function resolveMaxBet(gameState) {
+  return gameState.maxBet !== undefined ? gameState.maxBet : 150;
+}
 
 // ============================================================
 // AI Players
@@ -42,7 +48,7 @@ async function getState(req, res) {
         playerChips: user.balance,
       });
 
-    const gm = new GameManager(botRegistry);
+    const gm = new GameManager(botRegistry, 1, 2, resolveMaxBet(gameState));
     return res.json({
       gameState: gm.buildStateResponse(gameState, user),
       username: user.username,
@@ -62,12 +68,13 @@ async function newGame(req, res) {
   }
 
   try {
-    const aiIds = aiConfigs.map((c) => c.aiPlayerId);
-    const validAIs = await AIPlayer.find({
-      _id: { $in: aiIds },
-      gameId,
-      active: true,
-    });
+    const [game, validAIs] = await Promise.all([
+      Game.findById(gameId).select("maxBet"),
+      AIPlayer.find({ _id: { $in: aiConfigs.map((c) => c.aiPlayerId) }, gameId, active: true }),
+    ]);
+
+    if (!game) return res.status(400).json({ error: "Game not found" });
+
     const aiMap = Object.fromEntries(
       validAIs.map((a) => [a._id.toString(), a]),
     );
@@ -93,6 +100,8 @@ async function newGame(req, res) {
       chips: 1000,
     }));
 
+    const maxBet = game.maxBet !== undefined ? game.maxBet : 150;
+
     const [gameState, user] = await Promise.all([
       GameState.create({
         userId: req.userId,
@@ -100,6 +109,7 @@ async function newGame(req, res) {
         status: "active",
         dealerSeat: Math.floor(Math.random() * 6),
         handCount: 0,
+        maxBet,
         aiSeats,
         currentHand: null,
       }),
@@ -134,7 +144,7 @@ async function deal(req, res) {
       return res.status(400).json({ error: "Hand already in progress" });
     }
 
-    const gm = new GameManager(botRegistry);
+    const gm = new GameManager(botRegistry, 1, 2, resolveMaxBet(gameState));
     const result = await gm.startHand(gameState, user);
     return res.json(result);
   } catch (err) {
@@ -170,6 +180,7 @@ async function playerAction(req, res) {
     const myBet = hand.seatBets["0"] || 0;
     const toCall = Math.max(0, hand.currentBet - myBet);
     const chips = user.balance;
+    const maxBet = resolveMaxBet(gameState);
 
     // Validate
     let valid = false;
@@ -177,16 +188,17 @@ async function playerAction(req, res) {
     else if (action === "check") valid = toCall === 0;
     else if (action === "call") valid = toCall > 0 && toCall < chips;
     else if (action === "raise") {
+      const maxAllowed = maxBet !== null ? maxBet : chips;
       valid =
         typeof amount === "number" &&
         amount >= MIN_RAISE &&
-        amount <= MAX_HAND_BET &&
+        amount <= maxAllowed &&
         toCall + amount <= chips;
     } else if (action === "all_in") valid = chips > 0;
 
     if (!valid) return res.status(400).json({ error: "Invalid action" });
 
-    const gm = new GameManager(botRegistry);
+    const gm = new GameManager(botRegistry, 1, 2, maxBet);
     gm.applyAction(hand, 0, { type: action, amount }, gameState, user);
 
     const actionLog = [{ type: "action", seat: 0, action, amount }];

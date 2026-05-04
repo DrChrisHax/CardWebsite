@@ -369,7 +369,7 @@
     loadGameSpeed();
     const games = await apiFetch("/api/user/mygames");
     const thGame = games.find(function (g) {
-      return g.path === "/games/texas_holdem";
+      return g.path === window.location.pathname;
     });
 
     if (!thGame) {
@@ -531,8 +531,9 @@
       // Slider represents raise-by amount (increment above the call).
       // Server receives this increment directly.
       const minRaiseBy = state.minHandBet || 2;
+      const configuredMax = state.maxHandBet != null ? state.maxHandBet : Infinity;
       const maxRaiseBy = Math.min(
-        state.maxHandBet || 150,
+        configuredMax,
         Math.max(0, (state.playerChips || 0) - currentToCall),
       );
       const slider = document.getElementById("raise-slider");

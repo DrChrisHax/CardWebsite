@@ -5,6 +5,7 @@ const gameSchema = new mongoose.Schema({
   path: { type: String, required: true },
   price: { type: Number, required: true, default: 0 },
   active: { type: Boolean, default: true },
+  maxBet: { type: Number, default: null },
   createdOn: { type: Date, default: Date.now },
   updatedOn: { type: Date, default: Date.now },
   deletedOn: { type: Date, default: null },

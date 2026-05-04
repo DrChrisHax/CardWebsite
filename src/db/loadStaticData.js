@@ -4,10 +4,10 @@ const AIPlayer = require("../models/AIPlayer");
 const aiPlayers = require("../data/aiPlayers.json");
 
 async function populateGames() {
-  const count = await Game.countDocuments();
-  if (count > 0) return;
-  await Game.insertMany(games);
-  console.log(`Populated ${games.length} game(s)`);
+  for (const game of games) {
+    await Game.findOneAndUpdate({ path: game.path }, { $set: game }, { upsert: true });
+  }
+  console.log(`Upserted ${games.length} game(s)`);
 }
 
 async function populateAIPlayers() {

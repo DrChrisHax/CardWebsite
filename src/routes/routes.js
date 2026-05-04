@@ -65,6 +65,9 @@ router.get("/metrics", (req, res) => res.sendFile(page("metrics.html")));
 router.get("/games/texas_holdem", (req, res) =>
   res.sendFile(page("games/texas_holdem.html")),
 );
+router.get("/games/texas_holdem_unlimited", (req, res) =>
+  res.sendFile(page("games/texas_holdem_unlimited.html")),
+);
 
 // ============================================================
 // Auth

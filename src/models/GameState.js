@@ -17,6 +17,7 @@ const gameStateSchema = new mongoose.Schema({
   status: { type: String, default: "active" }, // 'active' | 'completed'
   dealerSeat: { type: Number, default: 0 },
   handCount: { type: Number, default: 0 },
+  maxBet: { type: Number, default: null }, // null = unlimited; set once at game creation
   aiSeats: [aiSeatSchema],
   currentHand: { type: mongoose.Schema.Types.Mixed, default: null },
   createdAt: { type: Date, default: Date.now },

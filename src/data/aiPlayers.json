@@ -46,5 +46,41 @@
     "model": "TightPassiveBot",
     "gameName": "Texas Hold'em",
     "active": true
+  },
+  {
+    "playerName": "Call Bot",
+    "model": "CallBot",
+    "gameName": "Texas Hold'em - Unlimited",
+    "active": true
+  },
+  {
+    "playerName": "Fold Bot",
+    "model": "FoldBot",
+    "gameName": "Texas Hold'em - Unlimited",
+    "active": true
+  },
+  {
+    "playerName": "Loose Agressive Bot",
+    "model": "LooseAgressiveBot",
+    "gameName": "Texas Hold'em - Unlimited",
+    "active": true
+  },
+  {
+    "playerName": "Tight Agressive Bot",
+    "model": "TightAgressiveBot",
+    "gameName": "Texas Hold'em - Unlimited",
+    "active": true
+  },
+  {
+    "playerName": "Loose Passive Bot",
+    "model": "LoosePassiveBot",
+    "gameName": "Texas Hold'em - Unlimited",
+    "active": true
+  },
+  {
+    "playerName": "Tight Passive Bot",
+    "model": "TightPassiveBot",
+    "gameName": "Texas Hold'em - Unlimited",
+    "active": true
   }
 ]

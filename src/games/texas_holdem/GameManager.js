@@ -19,10 +19,11 @@ const POSITIONS = [
 ];
 
 class GameManager {
-  constructor(botRegistry, smallBlind = 1, bigBlind = 2) {
+  constructor(botRegistry, smallBlind = 1, bigBlind = 2, maxBet = 150) {
     this.botRegistry = botRegistry;
     this.smallBlind = smallBlind;
     this.bigBlind = bigBlind;
+    this.maxBet = maxBet; // null = unlimited
   }
 
   // ============================================================
@@ -232,9 +233,10 @@ class GameManager {
 
       case ActionType.RAISE:
       case "raise": {
-        // action.amount = raise increment on top of currentBet, capped at MAX_HAND_BET per raise
         const oldBet = hand.currentBet;
-        const raiseIncrement = Math.min(action.amount || 0, MAX_HAND_BET);
+        const raiseIncrement = this.maxBet !== null
+          ? Math.min(action.amount || 0, this.maxBet)
+          : (action.amount || 0);
         const newBetLevel = oldBet + raiseIncrement;
         const additional = newBetLevel - prevBet;
         const cappedAdd = Math.min(additional, chips);
@@ -287,7 +289,7 @@ class GameManager {
       status: gameState.status,
       dealerSeat: gameState.dealerSeat,
       minHandBet: MIN_RAISE,
-      maxHandBet: MAX_HAND_BET,
+      maxHandBet: this.maxBet,
       handCount: gameState.handCount,
       playerChips: user.balance,
       aiSeats: gameState.aiSeats.map((a) => ({
@@ -644,7 +646,7 @@ class GameManager {
       stack,
       chipsToCall,
       minRaise: hand.lastRaiseAmount || this.bigBlind,
-      maxBet: stack,
+      maxBet: this.maxBet !== null ? Math.min(stack, this.maxBet) : stack,
       pot: hand.pot,
       position,
       street: hand.phase,

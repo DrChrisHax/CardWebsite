@@ -3,24 +3,35 @@
     "gameName": "Texas Hold'em",
     "path": "/games/texas_holdem",
     "price": 0,
-    "active": true
+    "active": true,
+    "maxBet": 150
+  },
+  {
+    "gameName": "Texas Hold'em - Unlimited",
+    "path": "/games/texas_holdem_unlimited",
+    "price": 1500,
+    "active": true,
+    "maxBet": null
   },
   {
     "gameName": "Test 1",
     "path": "/",
     "price": 10,
-    "active": true
+    "active": true,
+    "maxBet": null
   },
   {
     "gameName": "Test 2",
     "path": "/",
     "price": 10000,
-    "active": true
+    "active": true,
+    "maxBet": null
   },
   {
     "gameName": "Test 3",
     "path": "/",
     "price": 1000000,
-    "active": true
+    "active": true,
+    "maxBet": null
   }
 ]
