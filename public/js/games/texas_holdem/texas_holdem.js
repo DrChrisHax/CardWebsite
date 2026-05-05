@@ -929,46 +929,10 @@
     hideOverlay();
     showSeats(activeGameState);
     if (activeGameState && activeGameState.currentHand) {
-      renderState(adaptRawState(activeGameState, playerData.chips));
+      renderState(activeGameState);
     } else {
       dealHand();
     }
-  }
-
-  // Adapts the raw gameState document (shape from /api/poker/state) to
-  // the buildStateResponse shape that renderState expects
-  function adaptRawState(raw, playerChips) {
-    const hand = raw.currentHand;
-    return {
-      dealerSeat: raw.dealerSeat,
-      handCount: raw.handCount,
-      playerChips: playerChips,
-      aiSeats: raw.aiSeats.map(function (a) {
-        return {
-          seat: a.seat,
-          displayName: a.displayName,
-          chips: a.chips,
-          active: a.active,
-        };
-      }),
-      currentHand: hand
-        ? {
-            phase: hand.phase,
-            communityCards: hand.communityCards || [],
-            pot: hand.pot || 0,
-            currentBet: hand.currentBet || 0,
-            lastRaiseAmount: hand.lastRaiseAmount || 0,
-            activeSeat: hand.activeSeat,
-            activeSeats: hand.activeSeats || [],
-            playerCards:
-              (hand.holeCards && (hand.holeCards["0"] || hand.holeCards[0])) ||
-              [],
-            seatBets: hand.seatBets || {},
-            foldedSeats: hand.foldedSeats || [],
-            allInSeats: hand.allInSeats || [],
-          }
-        : null,
-    };
   }
 
   // ============================================================
