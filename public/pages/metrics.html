@@ -45,6 +45,44 @@
             <canvas id="metrics-chart"></canvas>
           </div>
         </div>
+
+        <section class="hand-records" id="hand-records" hidden>
+          <div class="hand-record-grid">
+            <div class="grid-header wins-header">
+              <h3>Biggest Wins</h3>
+            </div>
+            <table class="record-table" id="wins-table" aria-label="Biggest Wins">
+              <thead>
+                <tr>
+                  <th data-grid="wins" data-col="session" scope="col">Session <span class="sort-arrow" aria-hidden="true"></span></th>
+                  <th data-grid="wins" data-col="hand" scope="col">Hand # <span class="sort-arrow" aria-hidden="true"></span></th>
+                  <th data-grid="wins" data-col="amount" scope="col">Amount <span class="sort-arrow" aria-hidden="true"></span></th>
+                  <th data-grid="wins" data-col="handType" scope="col">Hand Type <span class="sort-arrow" aria-hidden="true"></span></th>
+                </tr>
+              </thead>
+              <tbody id="wins-body"></tbody>
+            </table>
+            <p class="no-records" id="wins-empty" hidden>No wins recorded yet.</p>
+          </div>
+
+          <div class="hand-record-grid">
+            <div class="grid-header losses-header">
+              <h3>Biggest Losses <span class="grid-info" title="Losses of $2 or less (blind posts) are excluded.">ⓘ</span></h3>
+            </div>
+            <table class="record-table" id="losses-table" aria-label="Biggest Losses">
+              <thead>
+                <tr>
+                  <th data-grid="losses" data-col="session" scope="col">Session <span class="sort-arrow" aria-hidden="true"></span></th>
+                  <th data-grid="losses" data-col="hand" scope="col">Hand # <span class="sort-arrow" aria-hidden="true"></span></th>
+                  <th data-grid="losses" data-col="amount" scope="col">Amount <span class="sort-arrow" aria-hidden="true"></span></th>
+                  <th data-grid="losses" data-col="handType" scope="col">Hand Type <span class="sort-arrow" aria-hidden="true"></span></th>
+                </tr>
+              </thead>
+              <tbody id="losses-body"></tbody>
+            </table>
+            <p class="no-records" id="losses-empty" hidden>No losses recorded yet.</p>
+          </div>
+        </section>
       </main>
     </div>
 

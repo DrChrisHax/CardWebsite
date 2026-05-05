@@ -94,7 +94,7 @@
   flex-direction: column;
   padding: 1.5rem;
   gap: 1.25rem;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* ── Controls ── */
@@ -138,8 +138,8 @@
 /* ── Chart area ── */
 
 .chart-area {
-  flex: 1;
-  min-height: 0;
+  height: 340px;
+  flex-shrink: 0;
   position: relative;
 }
 
@@ -161,4 +161,133 @@
   justify-content: center;
   color: var(--text-muted);
   font-size: 0.95rem;
+}
+
+/* ── Hand Record Grids ── */
+
+.hand-records {
+  display: flex;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.hand-record-grid {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.grid-header {
+  padding: 0.65rem 1rem;
+  border-bottom: 2px solid transparent;
+}
+
+.wins-header {
+  border-bottom-color: var(--green);
+}
+
+.losses-header {
+  border-bottom-color: var(--red);
+}
+
+.grid-header h3 {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.wins-header h3 {
+  color: var(--green);
+}
+
+.losses-header h3 {
+  color: var(--red);
+}
+
+.grid-info {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.6;
+  cursor: help;
+  vertical-align: middle;
+}
+
+.record-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.record-table th {
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  transition: color var(--transition);
+}
+
+.record-table th:hover {
+  color: var(--text);
+}
+
+.record-table th.sort-active {
+  color: var(--text);
+}
+
+.sort-arrow {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 0.65rem;
+  opacity: 0.4;
+}
+
+.sort-active .sort-arrow {
+  opacity: 1;
+}
+
+.record-table td {
+  padding: 0.4rem 0.75rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.record-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.record-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
+.amount-win {
+  color: var(--green);
+  font-weight: 500;
+}
+
+.amount-loss {
+  color: var(--red);
+  font-weight: 500;
+}
+
+.no-records {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 680px) {
+  .hand-records {
+    flex-direction: column;
+  }
 }

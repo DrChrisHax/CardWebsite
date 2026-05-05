@@ -1,5 +1,24 @@
 let selectedGame = null;
 let chartInstance = null;
+let winRecords = [];
+let lossRecords = [];
+
+const HAND_RANKS = {
+  "straight flush": 9,
+  "four of a kind": 8,
+  "full house": 7,
+  "flush": 6,
+  "straight": 5,
+  "three of a kind": 4,
+  "two pairs": 3,
+  "one pair": 2,
+  "high card": 1,
+};
+
+const gridSortState = {
+  wins:   { col: "amount", dir: "desc" },
+  losses: { col: "amount", dir: "asc" },
+};
 
 function authHeader() {
   return { Authorization: "Bearer " + localStorage.getItem("token") };
@@ -69,6 +88,7 @@ function selectGame(game) {
   });
 
   loadChart();
+  loadHandRecords();
 }
 
 async function loadChart() {
@@ -342,7 +362,123 @@ function renderResultsChart(counts) {
   });
 }
 
-document.getElementById("session-select").addEventListener("change", loadChart);
+// ── Hand Record Grids ─────────────────────────────────────────
+
+async function loadHandRecords() {
+  if (!selectedGame) return;
+  const gameId = selectedGame._id;
+  const gameStateId = document.getElementById("session-select").value;
+  const base = `/api/metrics/texas-holdem/hand-records?gameId=${gameId}&gameStateId=${gameStateId}`;
+
+  try {
+    const [wins, losses] = await Promise.all([
+      api(base + "&type=wins"),
+      api(base + "&type=losses"),
+    ]);
+    winRecords = wins;
+    lossRecords = losses;
+    renderGrid("wins");
+    renderGrid("losses");
+    document.getElementById("hand-records").removeAttribute("hidden");
+  } catch {
+    // charts still work even if grids fail
+  }
+}
+
+function sortRecords(records, col, dir) {
+  const m = dir === "asc" ? 1 : -1;
+  return [...records].sort((a, b) => {
+    if (col === "session") return (a.sessionNumber - b.sessionNumber) * m;
+    if (col === "hand")    return (a.handNumber - b.handNumber) * m;
+    if (col === "amount")  return (a.netChange - b.netChange) * m;
+    if (col === "handType") {
+      const ra = HAND_RANKS[a.winningHandType] || 0;
+      const rb = HAND_RANKS[b.winningHandType] || 0;
+      const diff = (ra - rb) * m;
+      return diff !== 0 ? diff : (a.netChange - b.netChange) * m;
+    }
+    return 0;
+  });
+}
+
+function renderGrid(gridType) {
+  const records = gridType === "wins" ? winRecords : lossRecords;
+  const { col, dir } = gridSortState[gridType];
+  const sorted = sortRecords(records, col, dir);
+
+  const tbody   = document.getElementById(gridType === "wins" ? "wins-body"  : "losses-body");
+  const emptyEl = document.getElementById(gridType === "wins" ? "wins-empty" : "losses-empty");
+  const tableEl = document.getElementById(gridType === "wins" ? "wins-table" : "losses-table");
+
+  // Sync header sort indicators
+  tableEl.querySelectorAll("th[data-col]").forEach((th) => {
+    const arrow = th.querySelector(".sort-arrow");
+    if (th.dataset.col === col) {
+      th.classList.add("sort-active");
+      arrow.textContent = dir === "asc" ? "▲" : "▼";
+    } else {
+      th.classList.remove("sort-active");
+      arrow.textContent = "";
+    }
+  });
+
+  if (!sorted.length) {
+    tbody.innerHTML = "";
+    tableEl.hidden = true;
+    emptyEl.removeAttribute("hidden");
+    return;
+  }
+
+  tableEl.hidden = false;
+  emptyEl.setAttribute("hidden", "");
+
+  tbody.innerHTML = sorted
+    .map((r) => {
+      const amountCell =
+        gridType === "wins"
+          ? `<span class="amount-win">+$${r.netChange.toLocaleString("en-US")}</span>`
+          : `<span class="amount-loss">-$${Math.abs(r.netChange).toLocaleString("en-US")}</span>`;
+      const handType = r.winningHandType || "No showdown";
+      return `<tr>
+        <td>${r.sessionNumber}</td>
+        <td>${r.handNumber}</td>
+        <td>${amountCell}</td>
+        <td>${handType}</td>
+      </tr>`;
+    })
+    .join("");
+}
+
+function initGridSort() {
+  document.querySelectorAll(".record-table th[data-col]").forEach((th) => {
+    th.addEventListener("click", () => {
+      const grid = th.dataset.grid;
+      const col  = th.dataset.col;
+      const state = gridSortState[grid];
+      if (state.col === col) {
+        state.dir = state.dir === "asc" ? "desc" : "asc";
+      } else {
+        state.col = col;
+        // Default direction per column and grid
+        if (col === "amount") {
+          state.dir = grid === "losses" ? "asc" : "desc";
+        } else if (col === "handType") {
+          state.dir = "desc";
+        } else {
+          state.dir = "asc";
+        }
+      }
+      renderGrid(grid);
+    });
+  });
+}
+
+initGridSort();
+
+document.getElementById("session-select").addEventListener("change", () => {
+  loadChart();
+  loadHandRecords();
+});
 document.getElementById("graph-type").addEventListener("change", loadChart);
 
 // ── Reset game data ───────────────────────────────────────────
@@ -370,6 +506,7 @@ document.getElementById("btn-reset-confirm").addEventListener("click", async fun
   } finally {
     modalReset.setAttribute("hidden", "");
     loadChart();
+    loadHandRecords();
   }
 });
 

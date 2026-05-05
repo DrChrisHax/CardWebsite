@@ -42,6 +42,7 @@ const {
   getBalancePerHand,
   getNetProfitPerHand,
   getResultsBreakdown,
+  getHandRecords,
 } = require("../controllers/metrics/TexasHoldemMetricsController");
 
 const { requireAuth } = require("../middleware/auth");
@@ -125,6 +126,11 @@ router.get(
   "/api/metrics/texas-holdem/results-breakdown",
   requireAuth,
   getResultsBreakdown,
+);
+router.get(
+  "/api/metrics/texas-holdem/hand-records",
+  requireAuth,
+  getHandRecords,
 );
 
 // ============================================================
