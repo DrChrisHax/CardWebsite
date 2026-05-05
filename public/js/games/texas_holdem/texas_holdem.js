@@ -144,6 +144,7 @@
     const cardsEl = el.querySelector(".seat-cards");
     const img = document.createElement("img");
     img.src = cardBackUrl();
+    img.alt = "face-down card";
     img.className = "card-img dealing";
     cardsEl.appendChild(img);
     await waitForAnimation(img, gameSpeed * 0.6);
@@ -160,6 +161,7 @@
       slot.appendChild(img);
     }
     img.src = cardUrl(code, true);
+    img.alt = cardLabel(code);
     img.classList.add("dealing");
     slot.classList.add("has-card");
     slot.dataset.tooltip = cardLabel(code);
@@ -202,6 +204,7 @@
       const flips = hand.playerCards.map(function (code) {
         const img = document.createElement("img");
         img.src = cardUrl(code, false);
+        img.alt = cardLabel(code);
         img.className = "card-img dealing";
         playerCardsEl.appendChild(img);
         return waitForAnimation(img, gameSpeed * 0.6).then(function () {
@@ -452,6 +455,7 @@
         for (let i = 0; i < 2; i++) {
           const img = document.createElement("img");
           img.src = cardBackUrl();
+          img.alt = "face-down card";
           img.className = "card-img";
           cardsEl.appendChild(img);
         }
@@ -473,6 +477,7 @@
       hand.playerCards.forEach(function (code) {
         const img = document.createElement("img");
         img.src = cardUrl(code, false);
+        img.alt = cardLabel(code);
         img.className = "card-img";
         playerCardsEl.appendChild(img);
       });
@@ -492,6 +497,7 @@
             slot.appendChild(img);
           }
           img.src = cardUrl(code, true);
+          img.alt = cardLabel(code);
           slot.classList.add("has-card");
           slot.dataset.tooltip = cardLabel(code);
         } else {
@@ -685,6 +691,7 @@
         cards.forEach(function (code) {
           const img = document.createElement("img");
           img.src = cardUrl(code, false);
+          img.alt = cardLabel(code);
           img.className = "card-img";
           cardsEl.appendChild(img);
         });
