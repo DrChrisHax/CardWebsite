@@ -1,5 +1,6 @@
 const UserPurchasedGames = require("../../models/UserPurchasedGames");
 const GameState = require("../../models/GameState");
+const HandHistory = require("../../models/HandHistory");
 
 async function getGames(req, res) {
   try {
@@ -31,4 +32,14 @@ async function getGames(req, res) {
   }
 }
 
-module.exports = { getGames };
+async function resetGameHistory(req, res) {
+  const { gameId } = req.params;
+  try {
+    await HandHistory.deleteMany({ userId: req.userId, gameId });
+    return res.json({ deleted: true });
+  } catch {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+module.exports = { getGames, resetGameHistory };

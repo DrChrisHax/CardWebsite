@@ -14,6 +14,9 @@
       <aside class="metrics-sidebar">
         <p class="sidebar-title">My Games</p>
         <ul class="sidebar-game-list" id="game-list"></ul>
+        <div class="sidebar-footer" id="sidebar-footer" hidden>
+          <button id="btn-reset-data" class="btn-reset-data">Reset Game Data</button>
+        </div>
       </aside>
 
       <main class="metrics-main">
@@ -43,6 +46,17 @@
           </div>
         </div>
       </main>
+    </div>
+
+    <div id="modal-reset" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Reset Game Data</h2>
+        <p>This will permanently delete all hand history for <strong id="reset-game-name"></strong>. This cannot be undone.</p>
+        <div class="modal-actions">
+          <button id="btn-reset-cancel" class="modal-cancel">Cancel</button>
+          <button id="btn-reset-confirm" class="modal-confirm modal-confirm--danger">Delete All Data</button>
+        </div>
+      </div>
     </div>
 
     <script src="/vendor/chart.js"></script>

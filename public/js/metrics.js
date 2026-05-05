@@ -11,6 +11,12 @@ async function api(path) {
   return res.json();
 }
 
+async function apiDelete(path) {
+  const res = await fetch(path, { method: "DELETE", headers: authHeader() });
+  if (!res.ok) throw new Error(res.status);
+  return res.json();
+}
+
 async function init() {
   let games;
   try {
@@ -50,6 +56,8 @@ function selectGame(game) {
   document.querySelectorAll(".sidebar-game-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.gameId === String(game._id));
   });
+
+  document.getElementById("sidebar-footer").hidden = false;
 
   const sessionSelect = document.getElementById("session-select");
   sessionSelect.innerHTML = '<option value="all">All Sessions</option>';
@@ -336,5 +344,33 @@ function renderResultsChart(counts) {
 
 document.getElementById("session-select").addEventListener("change", loadChart);
 document.getElementById("graph-type").addEventListener("change", loadChart);
+
+// ── Reset game data ───────────────────────────────────────────
+
+const modalReset = document.getElementById("modal-reset");
+
+document.getElementById("btn-reset-data").addEventListener("click", function () {
+  if (!selectedGame) return;
+  document.getElementById("reset-game-name").textContent = selectedGame.gameName;
+  modalReset.removeAttribute("hidden");
+});
+
+document.getElementById("btn-reset-cancel").addEventListener("click", function () {
+  modalReset.setAttribute("hidden", "");
+});
+
+modalReset.addEventListener("click", function (e) {
+  if (e.target === modalReset) modalReset.setAttribute("hidden", "");
+});
+
+document.getElementById("btn-reset-confirm").addEventListener("click", async function () {
+  if (!selectedGame) return;
+  try {
+    await apiDelete("/api/metrics/game/" + selectedGame._id + "/history");
+  } finally {
+    modalReset.setAttribute("hidden", "");
+    loadChart();
+  }
+});
 
 init();
