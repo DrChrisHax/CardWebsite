@@ -1,6 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const UserPurchasedGames = require("../models/UserPurchasedGames");
+const GameState = require("../models/GameState");
+const HandHistory = require("../models/HandHistory");
 const sessionManager = require("../utils/sessionManager");
 
 async function deactivateAccount(req, res) {
@@ -19,8 +22,15 @@ async function deactivateAccount(req, res) {
 
 async function deleteAccount(req, res) {
   try {
-    const user = await User.findByIdAndDelete(req.userId);
+    const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    await HandHistory.deleteMany({ userId: req.userId });
+    await GameState.deleteMany({ userId: req.userId });
+    await UserPurchasedGames.deleteMany({ userId: req.userId });
+    await User.findByIdAndDelete(req.userId);
+    sessionManager.remove(req.userId);
+
     return res.json({ message: "Account deleted" });
   } catch {
     return res.status(500).json({ error: "Server error" });
