@@ -50,7 +50,9 @@ async function createNavbar() {
         <div class="navbar-dropdown" hidden>
           <button class="dropdown-item" id="dd-profile">Profile</button>
           <button class="dropdown-item" id="dd-metrics" hidden>Metrics</button>
+          <!-- Settings not yet implemented
           <button class="dropdown-item" id="dd-settings">Settings</button>
+          -->
           <div class="dropdown-divider"></div>
           <button class="dropdown-item dropdown-item--danger" id="dd-logout">Log Out</button>
         </div>
